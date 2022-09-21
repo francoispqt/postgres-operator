@@ -92,7 +92,7 @@ type Cluster struct {
 	processMu           sync.RWMutex // protects the current operation for reporting, no need to hold the master mutex
 	specMu              sync.RWMutex // protects the spec for reporting, no need to hold the master mutex
 	streamApplications  []string
-	ConnectionPooler    map[PostgresRole]*ConnectionPoolerObjects
+	ConnectionPoolers   *ConnectionPoolers
 	EBSVolumes          map[string]volumes.VolumeProperties
 	VolumeResizer       volumes.VolumeResizer
 	currentMajorVersion int
@@ -1004,8 +1004,12 @@ func (c *Cluster) Delete() {
 	// manifest, just to not keep orphaned components in case if something went
 	// wrong
 	for _, role := range [2]PostgresRole{Master, Replica} {
-		if err := c.deleteConnectionPooler(role); err != nil {
-			c.logger.Warningf("could not remove connection pooler: %v", err)
+		if c.ConnectionPoolers.Groups[role] != nil {
+			for _, pooler := range c.ConnectionPoolers.Groups[role].Objects {
+				if err := c.deleteConnectionPooler(pooler); err != nil {
+					c.logger.Warningf("could not remove connection pooler: %v", err)
+				}
+			}
 		}
 	}
 

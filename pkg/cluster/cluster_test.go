@@ -765,7 +765,7 @@ func TestServiceAnnotations(t *testing.T) {
 			cl.Postgresql.Spec.EnableMasterLoadBalancer = tt.enableMasterLoadBalancerSpec
 			cl.Postgresql.Spec.EnableReplicaLoadBalancer = tt.enableReplicaLoadBalancerSpec
 
-			got := cl.generateServiceAnnotations(tt.role, &cl.Postgresql.Spec)
+			got := cl.generateServiceAnnotations(tt.role, &cl.Postgresql.Spec, "")
 			if len(tt.expect) != len(got) {
 				t.Errorf("expected %d annotation(s), got %d", len(tt.expect), len(got))
 				return
@@ -800,7 +800,9 @@ func TestInitSystemUsers(t *testing.T) {
 
 	// superuser is not allowed as connection pool user
 	cl.Spec.ConnectionPooler = &acidv1.ConnectionPooler{
-		User: "postgres",
+		ConnectionPoolerAuth: acidv1.ConnectionPoolerAuth{
+			User: "postgres",
+		},
 	}
 	cl.OpConfig.SuperUsername = "postgres"
 	cl.OpConfig.ConnectionPooler.User = "pooler"
@@ -813,7 +815,9 @@ func TestInitSystemUsers(t *testing.T) {
 	// neither protected users are
 	delete(cl.systemUsers, "pooler")
 	cl.Spec.ConnectionPooler = &acidv1.ConnectionPooler{
-		User: "admin",
+		ConnectionPoolerAuth: acidv1.ConnectionPoolerAuth{
+			User: "admin",
+		},
 	}
 	cl.OpConfig.ProtectedRoles = []string{"admin"}
 
@@ -824,7 +828,9 @@ func TestInitSystemUsers(t *testing.T) {
 
 	delete(cl.systemUsers, "pooler")
 	cl.Spec.ConnectionPooler = &acidv1.ConnectionPooler{
-		User: "standby",
+		ConnectionPoolerAuth: acidv1.ConnectionPoolerAuth{
+			User: "standby",
+		},
 	}
 
 	cl.initSystemUsers()

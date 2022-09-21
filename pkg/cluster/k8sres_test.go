@@ -9,6 +9,7 @@ import (
 
 	"testing"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 
 	acidv1 "github.com/zalando/postgres-operator/pkg/apis/acid.zalan.do/v1"
@@ -419,7 +420,7 @@ func TestPodEnvironmentSecretVariables(t *testing.T) {
 
 }
 
-func testEnvs(cluster *Cluster, podSpec *v1.PodTemplateSpec, role PostgresRole) error {
+func testEnvs(cluster *Cluster, podSpec *v1.PodTemplateSpec, role PostgresRole, _ string) error {
 	required := map[string]bool{
 		"PGHOST":                 false,
 		"PGPORT":                 false,
@@ -1403,7 +1404,7 @@ func testDeploymentOwnerReference(cluster *Cluster, deployment *appsv1.Deploymen
 	owner := deployment.ObjectMeta.OwnerReferences[0]
 
 	if owner.Name != cluster.Statefulset.ObjectMeta.Name {
-		return fmt.Errorf("Ownere reference is incorrect, got %s, expected %s",
+		return fmt.Errorf("Owner reference is incorrect, got %s, expected %s",
 			owner.Name, cluster.Statefulset.ObjectMeta.Name)
 	}
 
@@ -2480,22 +2481,48 @@ func TestEnableLoadBalancers(t *testing.T) {
 
 		cluster.Name = clusterName
 		cluster.Namespace = namespace
-		cluster.ConnectionPooler = map[PostgresRole]*ConnectionPoolerObjects{}
+		cluster.ConnectionPoolers = &ConnectionPoolers{
+			Groups: map[PostgresRole]*ConnectionPoolersGroup{
+				Master: &ConnectionPoolersGroup{
+					Objects: map[string]*ConnectionPoolerObjects{},
+				},
+				Replica: &ConnectionPoolersGroup{
+					Objects: map[string]*ConnectionPoolerObjects{},
+				},
+			},
+		}
 		generatedServices := make([]v1.ServiceSpec, 0)
 		for _, role := range roles {
 			cluster.syncService(role)
-			cluster.ConnectionPooler[role] = &ConnectionPoolerObjects{
-				Name:        cluster.connectionPoolerName(role),
+
+			connectionPoolerSpec, err := cluster.buildConnectionPoolerSpec(&tt.pgSpec.Spec, role, &acidv1.ConnectionPoolerParameters{})
+			if err != nil {
+				t.Error(err)
+			}
+
+			poolerName := cluster.connectionPoolerFullName(role, "")
+			cluster.ConnectionPoolers.Groups[role].Objects[""] = &ConnectionPoolerObjects{
+				FullName:    poolerName,
+				Name:        "",
 				ClusterName: cluster.ClusterName,
 				Namespace:   cluster.Namespace,
 				Role:        role,
 			}
-			cluster.syncConnectionPoolerWorker(&tt.pgSpec, &tt.pgSpec, role)
+			_, err = cluster.syncConnectionPoolerWorker(&tt.pgSpec, &tt.pgSpec, role, cluster.ConnectionPoolers.Groups[role].Objects[""], connectionPoolerSpec)
+
+			if err != nil {
+				t.Errorf("%s [%s]: failed to sync pooler worker %s", testName, tt.subTest, err)
+				return
+			}
+
+			spew.Dump(cluster.ConnectionPoolers.Groups[role].Objects[""])
+
 			generatedServices = append(generatedServices, cluster.Services[role].Spec)
-			generatedServices = append(generatedServices, cluster.ConnectionPooler[role].Service.Spec)
+			generatedServices = append(generatedServices, cluster.ConnectionPoolers.Groups[role].Objects[""].Service.Spec)
 		}
 		if !reflect.DeepEqual(tt.expectedServices, generatedServices) {
-			t.Errorf("%s %s: expected %#v but got %#v", testName, tt.subTest, tt.expectedServices, generatedServices)
+			spew.Dump(tt.expectedServices, generatedServices)
+			t.Errorf("%s [%s]: expected %#v but got %#v", testName, tt.subTest, tt.expectedServices, generatedServices)
 		}
 	}
 }

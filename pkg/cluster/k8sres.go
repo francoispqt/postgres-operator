@@ -1725,8 +1725,9 @@ func (c *Cluster) generateSingleUserSecret(namespace string, pgUser spec.PgUser)
 	username := pgUser.Name
 	lbls := c.labelsSet(true)
 
+	// TODO(francois): not sure what is that for
 	if username == constants.ConnectionPoolerUserName {
-		lbls = c.connectionPoolerLabels("", false).MatchLabels
+		lbls = c.connectionPoolerLabels("", "", false).MatchLabels
 	}
 
 	secret := v1.Secret{
@@ -1795,7 +1796,7 @@ func (c *Cluster) generateService(role PostgresRole, spec *acidv1.PostgresSpec) 
 			Name:        c.serviceName(role),
 			Namespace:   c.Namespace,
 			Labels:      c.roleLabelsSet(true, role),
-			Annotations: c.annotationsSet(c.generateServiceAnnotations(role, spec)),
+			Annotations: c.annotationsSet(c.generateServiceAnnotations(role, spec, "")),
 		},
 		Spec: serviceSpec,
 	}
@@ -1818,7 +1819,7 @@ func (c *Cluster) configureLoadBalanceService(serviceSpec *v1.ServiceSpec, sourc
 	serviceSpec.Type = v1.ServiceTypeLoadBalancer
 }
 
-func (c *Cluster) generateServiceAnnotations(role PostgresRole, spec *acidv1.PostgresSpec) map[string]string {
+func (c *Cluster) generateServiceAnnotations(role PostgresRole, spec *acidv1.PostgresSpec, dnsPrefix string) map[string]string {
 	annotations := make(map[string]string)
 
 	for k, v := range c.OpConfig.CustomServiceAnnotations {
@@ -1831,7 +1832,9 @@ func (c *Cluster) generateServiceAnnotations(role PostgresRole, spec *acidv1.Pos
 	}
 
 	if c.shouldCreateLoadBalancerForService(role, spec) {
-		dnsName := c.dnsName(role)
+		dnsName := c.dnsName(role, dnsPrefix)
+
+		c.logger.Info(fmt.Sprintf("SETTING dns name: %s", dnsName))
 
 		// Just set ELB Timeout annotation with default value, if it does not
 		// have a cutom value
@@ -1840,6 +1843,8 @@ func (c *Cluster) generateServiceAnnotations(role PostgresRole, spec *acidv1.Pos
 		}
 		// External DNS name annotation is not customizable
 		annotations[constants.ZalandoDNSNameAnnotation] = dnsName
+	} else {
+		c.logger.Info("NOT SETTING ANNOTATIONS")
 	}
 
 	if len(annotations) == 0 {

@@ -505,7 +505,7 @@ func (c *Cluster) roleLabelsSet(shouldAddExtraLabels bool, role PostgresRole) la
 	return lbls
 }
 
-func (c *Cluster) dnsName(role PostgresRole) string {
+func (c *Cluster) dnsName(role PostgresRole, prefix string) string {
 	var dnsString string
 
 	if role == Master {
@@ -514,13 +514,24 @@ func (c *Cluster) dnsName(role PostgresRole) string {
 		dnsString = c.replicaDNSName()
 	}
 
+	if prefix != "" {
+		dnsString = prefix + "." + dnsString
+	}
+
 	// if cluster name starts with teamID we might need to provide backwards compatibility
 	clusterNameWithoutTeamPrefix, _ := acidv1.ExtractClusterName(c.Name, c.Spec.TeamID)
 	if clusterNameWithoutTeamPrefix != "" {
 		if role == Replica {
 			clusterNameWithoutTeamPrefix = fmt.Sprintf("%s-repl", clusterNameWithoutTeamPrefix)
 		}
-		dnsString = fmt.Sprintf("%s,%s", dnsString, c.oldDNSFormat(clusterNameWithoutTeamPrefix))
+
+		oldDNSFormat := c.oldDNSFormat(clusterNameWithoutTeamPrefix)
+
+		if prefix != "" {
+			oldDNSFormat = prefix + "." + oldDNSFormat
+		}
+
+		dnsString = fmt.Sprintf("%s,%s", dnsString, oldDNSFormat)
 	}
 
 	return dnsString

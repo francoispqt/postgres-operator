@@ -124,14 +124,26 @@ func TestInheritedAnnotations(t *testing.T) {
 	}
 
 	// check pooler deployment annotations
-	cluster.ConnectionPooler = map[PostgresRole]*ConnectionPoolerObjects{}
-	cluster.ConnectionPooler[role] = &ConnectionPoolerObjects{
-		Name:        cluster.connectionPoolerName(role),
-		ClusterName: cluster.ClusterName,
-		Namespace:   cluster.Namespace,
-		Role:        role,
+	cluster.ConnectionPoolers = &ConnectionPoolers{
+		Groups: map[PostgresRole]*ConnectionPoolersGroup{},
 	}
-	deploy, err := cluster.generateConnectionPoolerDeployment(cluster.ConnectionPooler[role])
+	cluster.ConnectionPoolers.Groups[role] = &ConnectionPoolersGroup{
+		Objects: map[string]*ConnectionPoolerObjects{
+			"": &ConnectionPoolerObjects{
+				FullName:    cluster.connectionPoolerFullName(role, ""),
+				ClusterName: cluster.ClusterName,
+				Namespace:   cluster.Namespace,
+				Role:        role,
+			},
+		},
+	}
+
+	connectionPoolerSpec, err := cluster.buildConnectionPoolerSpec(&pg.Spec, Master, &acidv1.ConnectionPoolerParameters{})
+	if err != nil {
+		t.Error(err)
+	}
+
+	deploy, err := cluster.generateConnectionPoolerDeployment(cluster.ConnectionPoolers.Groups[role].Objects[""], connectionPoolerSpec)
 	assert.NoError(t, err)
 
 	if !(util.MapContains(deploy.ObjectMeta.Annotations, inheritedAnnotations)) {

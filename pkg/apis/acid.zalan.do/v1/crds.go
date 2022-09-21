@@ -276,6 +276,141 @@ var PostgresCRDResourceValidation = apiextv1.CustomResourceValidation{
 							},
 						},
 					},
+					"connectionPoolers": {
+						Type: "object",
+						AdditionalProperties: &apiextv1.JSONSchemaPropsOrBool{
+							Schema: &apiextv1.JSONSchemaProps{
+								Type: "object",
+								Properties: map[string]apiextv1.JSONSchemaProps{
+									"dockerImage": {
+										Type: "string",
+									},
+									"maxDBConnections": {
+										Type: "integer",
+									},
+									"mode": {
+										Type: "string",
+										Enum: []apiextv1.JSON{
+											{
+												Raw: []byte(`"session"`),
+											},
+											{
+												Raw: []byte(`"transaction"`),
+											},
+										},
+									},
+									"numberOfInstances": {
+										Type:    "integer",
+										Minimum: &min1,
+									},
+									"enableLoadBalancerService": {
+										Type: "boolean",
+									},
+									"serviceAnnotations": {
+										Type: "object",
+										AdditionalProperties: &apiextv1.JSONSchemaPropsOrBool{
+											Schema: &apiextv1.JSONSchemaProps{
+												Type: "string",
+											},
+										},
+									},
+									"resources": {
+										Type: "object",
+										Properties: map[string]apiextv1.JSONSchemaProps{
+											"limits": {
+												Type: "object",
+												Properties: map[string]apiextv1.JSONSchemaProps{
+													"cpu": {
+														Type:    "string",
+														Pattern: "^(\\d+m|\\d+(\\.\\d{1,3})?)$",
+													},
+													"memory": {
+														Type:    "string",
+														Pattern: "^(\\d+(e\\d+)?|\\d+(\\.\\d+)?(e\\d+)?[EPTGMK]i?)$",
+													},
+												},
+											},
+											"requests": {
+												Type: "object",
+												Properties: map[string]apiextv1.JSONSchemaProps{
+													"cpu": {
+														Type:    "string",
+														Pattern: "^(\\d+m|\\d+(\\.\\d{1,3})?)$",
+													},
+													"memory": {
+														Type:    "string",
+														Pattern: "^(\\d+(e\\d+)?|\\d+(\\.\\d+)?(e\\d+)?[EPTGMK]i?)$",
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"replicaConnectionPoolers": {
+						Type: "object",
+						AdditionalProperties: &apiextv1.JSONSchemaPropsOrBool{
+							Schema: &apiextv1.JSONSchemaProps{
+								Type: "object",
+								Properties: map[string]apiextv1.JSONSchemaProps{
+									"dockerImage": {
+										Type: "string",
+									},
+									"maxDBConnections": {
+										Type: "integer",
+									},
+									"mode": {
+										Type: "string",
+										Enum: []apiextv1.JSON{
+											{
+												Raw: []byte(`"session"`),
+											},
+											{
+												Raw: []byte(`"transaction"`),
+											},
+										},
+									},
+									"numberOfInstances": {
+										Type:    "integer",
+										Minimum: &min1,
+									},
+									"resources": {
+										Type: "object",
+										Properties: map[string]apiextv1.JSONSchemaProps{
+											"limits": {
+												Type: "object",
+												Properties: map[string]apiextv1.JSONSchemaProps{
+													"cpu": {
+														Type:    "string",
+														Pattern: "^(\\d+m|\\d+(\\.\\d{1,3})?)$",
+													},
+													"memory": {
+														Type:    "string",
+														Pattern: "^(\\d+(e\\d+)?|\\d+(\\.\\d+)?(e\\d+)?[EPTGMK]i?)$",
+													},
+												},
+											},
+											"requests": {
+												Type: "object",
+												Properties: map[string]apiextv1.JSONSchemaProps{
+													"cpu": {
+														Type:    "string",
+														Pattern: "^(\\d+m|\\d+(\\.\\d{1,3})?)$",
+													},
+													"memory": {
+														Type:    "string",
+														Pattern: "^(\\d+(e\\d+)?|\\d+(\\.\\d+)?(e\\d+)?[EPTGMK]i?)$",
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
 					"databases": {
 						Type: "object",
 						AdditionalProperties: &apiextv1.JSONSchemaPropsOrBool{
@@ -283,6 +418,9 @@ var PostgresCRDResourceValidation = apiextv1.CustomResourceValidation{
 								Type: "string",
 							},
 						},
+					},
+					"disableDefaultPooler": {
+						Type: "boolean",
 					},
 					"dockerImage": {
 						Type: "string",

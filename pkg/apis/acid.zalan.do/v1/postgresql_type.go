@@ -31,7 +31,11 @@ type PostgresSpec struct {
 
 	EnableConnectionPooler        *bool             `json:"enableConnectionPooler,omitempty"`
 	EnableReplicaConnectionPooler *bool             `json:"enableReplicaConnectionPooler,omitempty"`
+	DisableDefaultPooler          *bool             `json:"disableDefaultPooler,omitempty"`
 	ConnectionPooler              *ConnectionPooler `json:"connectionPooler,omitempty"`
+
+	ConnectionPoolers        map[string]*ConnectionPoolerParameters `json:"connectionPoolers,omitempty"`
+	ReplicaConnectionPoolers map[string]*ConnectionPoolerParameters `json:"replicaConnectionPoolers,omitempty"`
 
 	TeamID      string `json:"teamId"`
 	DockerImage string `json:"dockerImage,omitempty"`
@@ -230,12 +234,22 @@ type PostgresStatus struct {
 // makes sense to expose. E.g. pool size (min/max boundaries), max client
 // connections etc.
 type ConnectionPooler struct {
-	NumberOfInstances *int32 `json:"numberOfInstances,omitempty"`
-	Schema            string `json:"schema,omitempty"`
-	User              string `json:"user,omitempty"`
-	Mode              string `json:"mode,omitempty"`
-	DockerImage       string `json:"dockerImage,omitempty"`
-	MaxDBConnections  *int32 `json:"maxDBConnections,omitempty"`
+	ConnectionPoolerAuth       `json:",inline"`
+	ConnectionPoolerParameters `json:",inline"`
+}
+
+type ConnectionPoolerAuth struct {
+	Schema string `json:"schema,omitempty"`
+	User   string `json:"user,omitempty"`
+}
+
+type ConnectionPoolerParameters struct {
+	NumberOfInstances         *int32            `json:"numberOfInstances,omitempty"`
+	DockerImage               string            `json:"dockerImage,omitempty"`
+	MaxDBConnections          *int32            `json:"maxDBConnections,omitempty"`
+	Mode                      string            `json:"mode,omitempty"`
+	EnableLoadBalancerService *bool             `json:"enableLoadBalancerService,omitempty"`
+	ServiceAnnotations        map[string]string `json:"serviceAnnotations,omitempty"`
 
 	*Resources `json:"resources,omitempty"`
 }
