@@ -85,17 +85,18 @@ type Cluster struct {
 	deleteOptions    metav1.DeleteOptions
 	podEventsQueue   *cache.FIFO
 
-	teamsAPIClient      teams.Interface
-	oauthTokenGetter    OAuthTokenGetter
-	KubeClient          k8sutil.KubernetesClient //TODO: move clients to the better place?
-	currentProcess      Process
-	processMu           sync.RWMutex // protects the current operation for reporting, no need to hold the master mutex
-	specMu              sync.RWMutex // protects the spec for reporting, no need to hold the master mutex
-	streamApplications  []string
-	ConnectionPoolers   *ConnectionPoolers
-	EBSVolumes          map[string]volumes.VolumeProperties
-	VolumeResizer       volumes.VolumeResizer
-	currentMajorVersion int
+	teamsAPIClient        teams.Interface
+	oauthTokenGetter      OAuthTokenGetter
+	KubeClient            k8sutil.KubernetesClient //TODO: move clients to the better place?
+	currentProcess        Process
+	processMu             sync.RWMutex // protects the current operation for reporting, no need to hold the master mutex
+	specMu                sync.RWMutex // protects the spec for reporting, no need to hold the master mutex
+	streamApplications    []string
+	ConnectionPoolerSpecs map[string]*ConnectionPoolerSpec
+	ConnectionPoolers     *ConnectionPoolers
+	EBSVolumes            map[string]volumes.VolumeProperties
+	VolumeResizer         volumes.VolumeResizer
+	currentMajorVersion   int
 }
 
 type compareStatefulsetResult struct {
@@ -1003,12 +1004,10 @@ func (c *Cluster) Delete() {
 	// Delete connection pooler objects anyway, even if it's not mentioned in the
 	// manifest, just to not keep orphaned components in case if something went
 	// wrong
-	for _, role := range [2]PostgresRole{Master, Replica} {
-		if c.ConnectionPoolers.Groups[role] != nil {
-			for _, pooler := range c.ConnectionPoolers.Groups[role].Objects {
-				if err := c.deleteConnectionPooler(pooler); err != nil {
-					c.logger.Warningf("could not remove connection pooler: %v", err)
-				}
+	if c.ConnectionPoolers != nil && c.ConnectionPoolers.Objects != nil {
+		for _, pooler := range c.ConnectionPoolers.Objects {
+			if err := c.deleteConnectionPooler(pooler); err != nil {
+				c.logger.Warningf("could not remove connection pooler: %v", err)
 			}
 		}
 	}

@@ -178,6 +178,20 @@ func (in *ConnectionPoolerParameters) DeepCopyInto(out *ConnectionPoolerParamete
 			(*out)[key] = val
 		}
 	}
+	if in.PodLabels != nil {
+		in, out := &in.PodLabels, &out.PodLabels
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
+	if in.PodAnnotations != nil {
+		in, out := &in.PodAnnotations, &out.PodAnnotations
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	if in.Resources != nil {
 		in, out := &in.Resources, &out.Resources
 		*out = new(Resources)
@@ -645,6 +659,11 @@ func (in *PostgresSpec) DeepCopyInto(out *PostgresSpec) {
 		*out = new(bool)
 		**out = **in
 	}
+	if in.DisableDefaultPooler != nil {
+		in, out := &in.DisableDefaultPooler, &out.DisableDefaultPooler
+		*out = new(bool)
+		**out = **in
+	}
 	if in.ConnectionPooler != nil {
 		in, out := &in.ConnectionPooler, &out.ConnectionPooler
 		*out = new(ConnectionPooler)
@@ -652,21 +671,6 @@ func (in *PostgresSpec) DeepCopyInto(out *PostgresSpec) {
 	}
 	if in.ConnectionPoolers != nil {
 		in, out := &in.ConnectionPoolers, &out.ConnectionPoolers
-		*out = make(map[string]*ConnectionPoolerParameters, len(*in))
-		for key, val := range *in {
-			var outVal *ConnectionPoolerParameters
-			if val == nil {
-				(*out)[key] = nil
-			} else {
-				in, out := &val, &outVal
-				*out = new(ConnectionPoolerParameters)
-				(*in).DeepCopyInto(*out)
-			}
-			(*out)[key] = outVal
-		}
-	}
-	if in.ReplicaConnectionPoolers != nil {
-		in, out := &in.ReplicaConnectionPoolers, &out.ReplicaConnectionPoolers
 		*out = make(map[string]*ConnectionPoolerParameters, len(*in))
 		for key, val := range *in {
 			var outVal *ConnectionPoolerParameters

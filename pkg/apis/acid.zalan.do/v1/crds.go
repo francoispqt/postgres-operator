@@ -306,7 +306,7 @@ var PostgresCRDResourceValidation = apiextv1.CustomResourceValidation{
 									"enableLoadBalancerService": {
 										Type: "boolean",
 									},
-									"serviceAnnotations": {
+									"podLabels": {
 										Type: "object",
 										AdditionalProperties: &apiextv1.JSONSchemaPropsOrBool{
 											Schema: &apiextv1.JSONSchemaProps{
@@ -314,67 +314,24 @@ var PostgresCRDResourceValidation = apiextv1.CustomResourceValidation{
 											},
 										},
 									},
-									"resources": {
+									"podAnnotations": {
 										Type: "object",
-										Properties: map[string]apiextv1.JSONSchemaProps{
-											"limits": {
-												Type: "object",
-												Properties: map[string]apiextv1.JSONSchemaProps{
-													"cpu": {
-														Type:    "string",
-														Pattern: "^(\\d+m|\\d+(\\.\\d{1,3})?)$",
-													},
-													"memory": {
-														Type:    "string",
-														Pattern: "^(\\d+(e\\d+)?|\\d+(\\.\\d+)?(e\\d+)?[EPTGMK]i?)$",
-													},
-												},
-											},
-											"requests": {
-												Type: "object",
-												Properties: map[string]apiextv1.JSONSchemaProps{
-													"cpu": {
-														Type:    "string",
-														Pattern: "^(\\d+m|\\d+(\\.\\d{1,3})?)$",
-													},
-													"memory": {
-														Type:    "string",
-														Pattern: "^(\\d+(e\\d+)?|\\d+(\\.\\d+)?(e\\d+)?[EPTGMK]i?)$",
-													},
-												},
+										AdditionalProperties: &apiextv1.JSONSchemaPropsOrBool{
+											Schema: &apiextv1.JSONSchemaProps{
+												Type: "string",
 											},
 										},
 									},
-								},
-							},
-						},
-					},
-					"replicaConnectionPoolers": {
-						Type: "object",
-						AdditionalProperties: &apiextv1.JSONSchemaPropsOrBool{
-							Schema: &apiextv1.JSONSchemaProps{
-								Type: "object",
-								Properties: map[string]apiextv1.JSONSchemaProps{
-									"dockerImage": {
-										Type: "string",
-									},
-									"maxDBConnections": {
-										Type: "integer",
-									},
-									"mode": {
+									"target": {
 										Type: "string",
 										Enum: []apiextv1.JSON{
 											{
-												Raw: []byte(`"session"`),
+												Raw: []byte(`"master"`),
 											},
 											{
-												Raw: []byte(`"transaction"`),
+												Raw: []byte(`"replica"`),
 											},
 										},
-									},
-									"numberOfInstances": {
-										Type:    "integer",
-										Minimum: &min1,
 									},
 									"resources": {
 										Type: "object",

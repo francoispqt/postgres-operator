@@ -34,8 +34,7 @@ type PostgresSpec struct {
 	DisableDefaultPooler          *bool             `json:"disableDefaultPooler,omitempty"`
 	ConnectionPooler              *ConnectionPooler `json:"connectionPooler,omitempty"`
 
-	ConnectionPoolers        map[string]*ConnectionPoolerParameters `json:"connectionPoolers,omitempty"`
-	ReplicaConnectionPoolers map[string]*ConnectionPoolerParameters `json:"replicaConnectionPoolers,omitempty"`
+	ConnectionPoolers map[string]*ConnectionPoolerParameters `json:"connectionPoolers,omitempty"`
 
 	TeamID      string `json:"teamId"`
 	DockerImage string `json:"dockerImage,omitempty"`
@@ -250,6 +249,9 @@ type ConnectionPoolerParameters struct {
 	Mode                      string            `json:"mode,omitempty"`
 	EnableLoadBalancerService *bool             `json:"enableLoadBalancerService,omitempty"`
 	ServiceAnnotations        map[string]string `json:"serviceAnnotations,omitempty"`
+	Target                    string            `json:"target,omitempty"`
+	PodLabels                 map[string]string `json:"podLabels,omitempty"`
+	PodAnnotations            map[string]string `json:"podAnnotations,omitempty"`
 
 	*Resources `json:"resources,omitempty"`
 }

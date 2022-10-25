@@ -9,7 +9,6 @@ import (
 
 	"testing"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 
 	acidv1 "github.com/zalando/postgres-operator/pkg/apis/acid.zalan.do/v1"
@@ -2482,46 +2481,40 @@ func TestEnableLoadBalancers(t *testing.T) {
 		cluster.Name = clusterName
 		cluster.Namespace = namespace
 		cluster.ConnectionPoolers = &ConnectionPoolers{
-			Groups: map[PostgresRole]*ConnectionPoolersGroup{
-				Master: &ConnectionPoolersGroup{
-					Objects: map[string]*ConnectionPoolerObjects{},
-				},
-				Replica: &ConnectionPoolersGroup{
-					Objects: map[string]*ConnectionPoolerObjects{},
-				},
-			},
+			Objects: map[string]*ConnectionPoolerObjects{},
 		}
 		generatedServices := make([]v1.ServiceSpec, 0)
 		for _, role := range roles {
 			cluster.syncService(role)
 
-			connectionPoolerSpec, err := cluster.buildConnectionPoolerSpec(&tt.pgSpec.Spec, role, &acidv1.ConnectionPoolerParameters{})
+			connectionPoolerSpec, err := cluster.buildConnectionPoolerSpec(&tt.pgSpec.Spec, role, &acidv1.ConnectionPoolerParameters{Target: string(role)})
 			if err != nil {
 				t.Error(err)
 			}
 
-			poolerName := cluster.connectionPoolerFullName(role, "")
-			cluster.ConnectionPoolers.Groups[role].Objects[""] = &ConnectionPoolerObjects{
-				FullName:    poolerName,
+			poolerName := PoolerDefaultMasterKey
+			if role == Replica {
+				poolerName = PoolerDefaultReplicaKey
+			}
+			poolerFullName := cluster.connectionPoolerFullName(role, poolerName)
+			cluster.ConnectionPoolers.Objects[poolerName] = &ConnectionPoolerObjects{
+				FullName:    poolerFullName,
 				Name:        "",
 				ClusterName: cluster.ClusterName,
 				Namespace:   cluster.Namespace,
 				Role:        role,
 			}
-			_, err = cluster.syncConnectionPoolerWorker(&tt.pgSpec, &tt.pgSpec, role, cluster.ConnectionPoolers.Groups[role].Objects[""], connectionPoolerSpec)
+			_, err = cluster.syncConnectionPoolerWorker(&tt.pgSpec, &tt.pgSpec, role, cluster.ConnectionPoolers.Objects[poolerName], connectionPoolerSpec)
 
 			if err != nil {
 				t.Errorf("%s [%s]: failed to sync pooler worker %s", testName, tt.subTest, err)
 				return
 			}
 
-			spew.Dump(cluster.ConnectionPoolers.Groups[role].Objects[""])
-
 			generatedServices = append(generatedServices, cluster.Services[role].Spec)
-			generatedServices = append(generatedServices, cluster.ConnectionPoolers.Groups[role].Objects[""].Service.Spec)
+			generatedServices = append(generatedServices, cluster.ConnectionPoolers.Objects[poolerName].Service.Spec)
 		}
 		if !reflect.DeepEqual(tt.expectedServices, generatedServices) {
-			spew.Dump(tt.expectedServices, generatedServices)
 			t.Errorf("%s [%s]: expected %#v but got %#v", testName, tt.subTest, tt.expectedServices, generatedServices)
 		}
 	}

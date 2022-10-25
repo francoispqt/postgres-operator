@@ -125,12 +125,9 @@ func TestInheritedAnnotations(t *testing.T) {
 
 	// check pooler deployment annotations
 	cluster.ConnectionPoolers = &ConnectionPoolers{
-		Groups: map[PostgresRole]*ConnectionPoolersGroup{},
-	}
-	cluster.ConnectionPoolers.Groups[role] = &ConnectionPoolersGroup{
 		Objects: map[string]*ConnectionPoolerObjects{
-			"": &ConnectionPoolerObjects{
-				FullName:    cluster.connectionPoolerFullName(role, ""),
+			PoolerDefaultMasterKey: &ConnectionPoolerObjects{
+				FullName:    cluster.connectionPoolerFullName(role, PoolerDefaultMasterKey),
 				ClusterName: cluster.ClusterName,
 				Namespace:   cluster.Namespace,
 				Role:        role,
@@ -143,7 +140,7 @@ func TestInheritedAnnotations(t *testing.T) {
 		t.Error(err)
 	}
 
-	deploy, err := cluster.generateConnectionPoolerDeployment(cluster.ConnectionPoolers.Groups[role].Objects[""], connectionPoolerSpec)
+	deploy, err := cluster.generateConnectionPoolerDeployment(cluster.ConnectionPoolers.Objects[PoolerDefaultMasterKey], connectionPoolerSpec)
 	assert.NoError(t, err)
 
 	if !(util.MapContains(deploy.ObjectMeta.Annotations, inheritedAnnotations)) {
