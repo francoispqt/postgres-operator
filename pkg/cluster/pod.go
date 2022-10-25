@@ -440,18 +440,23 @@ func (c *Cluster) recreatePods(pods []v1.Pod, switchoverCandidates []spec.Namesp
 		// switchover if
 		// 1. we have not observed a new master pod when re-creating former replicas
 		// 2. we know possible switchover targets even when no replicas were recreated
-		if newMasterPod == nil && len(replicas) > 0 {
-			masterCandidate, err := c.getSwitchoverCandidate(masterPod)
-			if err != nil {
-				// do not recreate master now so it will keep the update flag and switchover will be retried on next sync
-				return fmt.Errorf("skipping switchover: %v", err)
+		if !c.Spec.DisableFailoverOnRollover {
+			if newMasterPod == nil && len(replicas) > 0 {
+				masterCandidate, err := c.getSwitchoverCandidate(masterPod)
+				if err != nil {
+					// do not recreate master now so it will keep the update flag and switchover will be retried on next sync
+					return fmt.Errorf("skipping switchover: %v", err)
+				}
+				if err := c.Switchover(masterPod, masterCandidate); err != nil {
+					return fmt.Errorf("could not perform switch over: %v", err)
+				}
+			} else if newMasterPod == nil && len(replicas) == 0 {
+				c.logger.Warningf("cannot perform switch over before re-creating the pod: no replicas")
 			}
-			if err := c.Switchover(masterPod, masterCandidate); err != nil {
-				return fmt.Errorf("could not perform switch over: %v", err)
-			}
-		} else if newMasterPod == nil && len(replicas) == 0 {
-			c.logger.Warningf("cannot perform switch over before re-creating the pod: no replicas")
+		} else {
+			c.logger.Debug("skipping switchover because disable on rollover")
 		}
+
 		c.logger.Infof("recreating old master pod %q", util.NameFromMeta(masterPod.ObjectMeta))
 
 		if _, err := c.recreatePod(util.NameFromMeta(masterPod.ObjectMeta)); err != nil {

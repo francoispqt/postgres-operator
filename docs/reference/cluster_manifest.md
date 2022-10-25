@@ -216,6 +216,12 @@ These parameters are grouped directly under  the `spec` key in the manifest.
   If you set the `all` special item, it will be mounted in all containers (postgres + sidecars).
   Else you can set the list of target containers in which the additional volumes will be mounted (eg : postgres, telegraf)
 
+* **disableFailoverOnRollover**
+  When performing a rollover the default method is to rollout the replicas and then,
+  when only the master is left to rollout, do a failover to an updated replica and rollout the old master pod.
+  If this parameter is set to true, the operator will not perform a failover and
+  just rollout the master pod.
+
 ## Prepared Databases
 
 The operator can create databases with default owner, reader and writer roles
@@ -316,12 +322,12 @@ explanation of `ttl` and `loop_wait` parameters.
 
 * **synchronous_node_count**
   Patroni `synchronous_node_count` parameter value. Note, this option is only available for Spilo images with Patroni 2.0+. The default is set to `1`. Optional.
-  
+
 ## Postgres container resources
 
 Those parameters define [CPU and memory requests and limits](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/)
 for the Postgres container. They are grouped under the `resources` top-level
-key with subgroups `requests` and `limits`. 
+key with subgroups `requests` and `limits`.
 
 ### Requests
 
@@ -438,7 +444,7 @@ properties of the persistent storage that stores Postgres data.
   allows for configuring the throughput in MB/s. Maximum is 1000. Optional.
 
 * **selector**
-  A label query over PVs to consider for binding. See the [Kubernetes 
+  A label query over PVs to consider for binding. See the [Kubernetes
   documentation](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/)
   for details on using `matchLabels` and `matchExpressions`. Optional
 
@@ -554,7 +560,7 @@ Those parameters are grouped under the `tls` top-level key.
 
 ## Change data capture streams
 
-This sections enables change data capture (CDC) streams via Postgres' 
+This sections enables change data capture (CDC) streams via Postgres'
 [logical decoding](https://www.postgresql.org/docs/14/logicaldecoding.html)
 feature and `pgoutput` plugin. While the Postgres operator takes responsibility
 for providing the setup to publish change events, it relies on external tools

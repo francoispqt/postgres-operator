@@ -321,6 +321,9 @@ var PostgresCRDResourceValidation = apiextv1.CustomResourceValidation{
 							},
 						},
 					},
+					"disableFailoverOnRollover": {
+						Type: "boolean",
+					},
 					"init_containers": {
 						Type:        "array",
 						Description: "deprecated",

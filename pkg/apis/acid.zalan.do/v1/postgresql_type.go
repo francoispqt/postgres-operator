@@ -62,27 +62,28 @@ type PostgresSpec struct {
 	UsersWithSecretRotation        []string             `json:"usersWithSecretRotation,omitempty"`
 	UsersWithInPlaceSecretRotation []string             `json:"usersWithInPlaceSecretRotation,omitempty"`
 
-	NumberOfInstances     int32                       `json:"numberOfInstances"`
-	MaintenanceWindows    []MaintenanceWindow         `json:"maintenanceWindows,omitempty"`
-	Clone                 *CloneDescription           `json:"clone,omitempty"`
-	Databases             map[string]string           `json:"databases,omitempty"`
-	PreparedDatabases     map[string]PreparedDatabase `json:"preparedDatabases,omitempty"`
-	SchedulerName         *string                     `json:"schedulerName,omitempty"`
-	NodeAffinity          *v1.NodeAffinity            `json:"nodeAffinity,omitempty"`
-	Tolerations           []v1.Toleration             `json:"tolerations,omitempty"`
-	Sidecars              []Sidecar                   `json:"sidecars,omitempty"`
-	InitContainers        []v1.Container              `json:"initContainers,omitempty"`
-	PodPriorityClassName  string                      `json:"podPriorityClassName,omitempty"`
-	ShmVolume             *bool                       `json:"enableShmVolume,omitempty"`
-	EnableLogicalBackup   bool                        `json:"enableLogicalBackup,omitempty"`
-	LogicalBackupSchedule string                      `json:"logicalBackupSchedule,omitempty"`
-	StandbyCluster        *StandbyDescription         `json:"standby,omitempty"`
-	PodAnnotations        map[string]string           `json:"podAnnotations,omitempty"`
-	ServiceAnnotations    map[string]string           `json:"serviceAnnotations,omitempty"`
-	TLS                   *TLSDescription             `json:"tls,omitempty"`
-	AdditionalVolumes     []AdditionalVolume          `json:"additionalVolumes,omitempty"`
-	Streams               []Stream                    `json:"streams,omitempty"`
-	Env                   []v1.EnvVar                 `json:"env,omitempty"`
+	NumberOfInstances         int32                       `json:"numberOfInstances"`
+	MaintenanceWindows        []MaintenanceWindow         `json:"maintenanceWindows,omitempty"`
+	Clone                     *CloneDescription           `json:"clone,omitempty"`
+	Databases                 map[string]string           `json:"databases,omitempty"`
+	PreparedDatabases         map[string]PreparedDatabase `json:"preparedDatabases,omitempty"`
+	SchedulerName             *string                     `json:"schedulerName,omitempty"`
+	NodeAffinity              *v1.NodeAffinity            `json:"nodeAffinity,omitempty"`
+	Tolerations               []v1.Toleration             `json:"tolerations,omitempty"`
+	Sidecars                  []Sidecar                   `json:"sidecars,omitempty"`
+	InitContainers            []v1.Container              `json:"initContainers,omitempty"`
+	PodPriorityClassName      string                      `json:"podPriorityClassName,omitempty"`
+	ShmVolume                 *bool                       `json:"enableShmVolume,omitempty"`
+	EnableLogicalBackup       bool                        `json:"enableLogicalBackup,omitempty"`
+	LogicalBackupSchedule     string                      `json:"logicalBackupSchedule,omitempty"`
+	StandbyCluster            *StandbyDescription         `json:"standby,omitempty"`
+	PodAnnotations            map[string]string           `json:"podAnnotations,omitempty"`
+	ServiceAnnotations        map[string]string           `json:"serviceAnnotations,omitempty"`
+	TLS                       *TLSDescription             `json:"tls,omitempty"`
+	AdditionalVolumes         []AdditionalVolume          `json:"additionalVolumes,omitempty"`
+	Streams                   []Stream                    `json:"streams,omitempty"`
+	Env                       []v1.EnvVar                 `json:"env,omitempty"`
+	DisableFailoverOnRollover bool                        `json:"disableFailoverOnRollover,omitempty"`
 
 	// deprecated json tags
 	InitContainersOld       []v1.Container `json:"init_containers,omitempty"`
