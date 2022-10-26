@@ -1029,7 +1029,6 @@ func TestConnectionPoolerDeploymentSpec(t *testing.T) {
 		expected                error
 		cluster                 *Cluster
 		connectionPoolerObjects *ConnectionPoolerObjects
-		connectionPoolerSpec    *ConnectionPoolerSpec
 		check                   func(cluster *Cluster, deployment *appsv1.Deployment, poolerName string) error
 	}{
 		{
@@ -1043,10 +1042,10 @@ func TestConnectionPoolerDeploymentSpec(t *testing.T) {
 				FullName:  cluster.connectionPoolerFullName(Master, "foo"),
 				Namespace: "default",
 				Role:      Master,
+				Spec:      connectionPoolerSpec,
 			},
-			connectionPoolerSpec: connectionPoolerSpec,
-			cluster:              cluster,
-			check:                noCheck,
+			cluster: cluster,
+			check:   noCheck,
 		},
 		{
 			subTest: "owner reference",
@@ -1059,9 +1058,9 @@ func TestConnectionPoolerDeploymentSpec(t *testing.T) {
 				FullName:  cluster.connectionPoolerFullName(Master, "foo"),
 				Namespace: "default",
 				Role:      Master,
+				Spec:      connectionPoolerSpec,
 			},
-			connectionPoolerSpec: connectionPoolerSpec,
-			cluster:              cluster,
+			cluster: cluster,
 			check: func(cluster *Cluster, deployment *appsv1.Deployment, _ string) error {
 				return testDeploymentOwnerReference(cluster, deployment)
 			},
@@ -1078,15 +1077,15 @@ func TestConnectionPoolerDeploymentSpec(t *testing.T) {
 				Name:      "foo",
 				Namespace: "default",
 				Role:      Master,
+				Spec:      connectionPoolerSpec,
 			},
-			connectionPoolerSpec: connectionPoolerSpec,
-			cluster:              cluster,
-			check:                testSelector,
+			cluster: cluster,
+			check:   testSelector,
 		},
 	}
 	for _, tt := range tests {
 
-		deployment, err := tt.cluster.generateConnectionPoolerDeployment(tt.connectionPoolerObjects, tt.connectionPoolerSpec)
+		deployment, err := tt.cluster.generateConnectionPoolerDeployment(tt.connectionPoolerObjects, tt.connectionPoolerObjects.Spec)
 
 		if err != tt.expected && err.Error() != tt.expected.Error() {
 			t.Errorf("%s [%s]: Could not generate deployment spec,\n %+v, expected\n %+v",
@@ -1131,10 +1130,10 @@ func testResources(cluster *Cluster, podSpec *v1.PodTemplateSpec, role PostgresR
 
 func testLabels(cluster *Cluster, podSpec *v1.PodTemplateSpec, role PostgresRole, poolerName string) error {
 	poolerLabels := podSpec.ObjectMeta.Labels["connection-pooler"]
-
-	if poolerLabels != cluster.connectionPoolerLabels(role, poolerName, true).MatchLabels["connection-pooler"] {
+	connectionPooler := &ConnectionPoolerObjects{Role: role, FullName: poolerName, Spec: &ConnectionPoolerSpec{}}
+	if poolerLabels != cluster.connectionPoolerLabels(connectionPooler, true).MatchLabels["connection-pooler"] {
 		return fmt.Errorf("Pod labels do not match, got %+v, expected %+v",
-			podSpec.ObjectMeta.Labels, cluster.connectionPoolerLabels(role, poolerName, true).MatchLabels)
+			podSpec.ObjectMeta.Labels, cluster.connectionPoolerLabels(connectionPooler, true).MatchLabels)
 	}
 
 	return nil
@@ -1142,7 +1141,8 @@ func testLabels(cluster *Cluster, podSpec *v1.PodTemplateSpec, role PostgresRole
 
 func testSelector(cluster *Cluster, deployment *appsv1.Deployment, poolerName string) error {
 	labels := deployment.Spec.Selector.MatchLabels
-	expected := cluster.connectionPoolerLabels(Master, poolerName, true).MatchLabels
+	connectionPooler := &ConnectionPoolerObjects{Role: Master, FullName: poolerName, Spec: &ConnectionPoolerSpec{}}
+	expected := cluster.connectionPoolerLabels(connectionPooler, true).MatchLabels
 
 	if labels["connection-pooler"] != expected["connection-pooler"] {
 		return fmt.Errorf("Labels are incorrect, got %+v, expected %+v",

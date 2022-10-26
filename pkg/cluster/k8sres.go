@@ -1727,7 +1727,7 @@ func (c *Cluster) generateSingleUserSecret(namespace string, pgUser spec.PgUser)
 
 	// TODO(francois): not sure what is that for
 	if username == constants.ConnectionPoolerUserName {
-		lbls = c.connectionPoolerLabels("", "", false).MatchLabels
+		lbls = c.connectionPoolerLabels(&ConnectionPoolerObjects{}, false).MatchLabels
 	}
 
 	secret := v1.Secret{
