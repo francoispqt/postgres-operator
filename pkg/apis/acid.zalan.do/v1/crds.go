@@ -322,6 +322,9 @@ var PostgresCRDResourceValidation = apiextv1.CustomResourceValidation{
 											},
 										},
 									},
+									"disablePostgresPodAnnotations": {
+										Type: "boolean",
+									},
 									"target": {
 										Type: "string",
 										Enum: []apiextv1.JSON{

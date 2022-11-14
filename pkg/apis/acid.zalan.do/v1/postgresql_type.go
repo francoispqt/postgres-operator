@@ -243,15 +243,16 @@ type ConnectionPoolerAuth struct {
 }
 
 type ConnectionPoolerParameters struct {
-	NumberOfInstances         *int32            `json:"numberOfInstances,omitempty"`
-	DockerImage               string            `json:"dockerImage,omitempty"`
-	MaxDBConnections          *int32            `json:"maxDBConnections,omitempty"`
-	Mode                      string            `json:"mode,omitempty"`
-	EnableLoadBalancerService *bool             `json:"enableLoadBalancerService,omitempty"`
-	ServiceAnnotations        map[string]string `json:"serviceAnnotations,omitempty"`
-	Target                    string            `json:"target,omitempty"`
-	PodLabels                 map[string]string `json:"podLabels,omitempty"`
-	PodAnnotations            map[string]string `json:"podAnnotations,omitempty"`
+	NumberOfInstances             *int32            `json:"numberOfInstances,omitempty"`
+	DockerImage                   string            `json:"dockerImage,omitempty"`
+	MaxDBConnections              *int32            `json:"maxDBConnections,omitempty"`
+	Mode                          string            `json:"mode,omitempty"`
+	EnableLoadBalancerService     *bool             `json:"enableLoadBalancerService,omitempty"`
+	ServiceAnnotations            map[string]string `json:"serviceAnnotations,omitempty"`
+	Target                        string            `json:"target,omitempty"`
+	PodLabels                     map[string]string `json:"podLabels,omitempty"`
+	PodAnnotations                map[string]string `json:"podAnnotations,omitempty"`
+	DisablePostgresPodAnnotations bool              `json:"disablePostgresPodAnnotations,omitempty"`
 
 	*Resources `json:"resources,omitempty"`
 }

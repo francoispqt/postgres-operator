@@ -290,7 +290,13 @@ func (c *Cluster) generateConnectionPoolerPodTemplate(role PostgresRole, connect
 
 	tolerationsSpec := tolerations(&spec.Tolerations, c.OpConfig.PodToleration)
 
-	podAnnotations := c.annotationsSet(c.generatePodAnnotations(spec))
+	var specForPodAnnotation *acidv1.PostgresSpec
+	var podAnnotations map[string]string
+
+	if !connectionPoolerSpec.DisablePostgresPodAnnotations {
+		specForPodAnnotation = spec
+		podAnnotations = c.annotationsSet(c.generatePodAnnotations(specForPodAnnotation))
+	}
 
 	if podAnnLen := len(connectionPoolerSpec.ConnectionPoolerParameters.PodAnnotations); podAnnotations == nil && podAnnLen > 0 {
 		podAnnotations = make(map[string]string, podAnnLen)
