@@ -414,6 +414,15 @@ func (c *Cluster) generateConnectionPoolerService(connectionPooler *ConnectionPo
 		Spec: serviceSpec,
 	}
 
+	if connectionPoolerSpec.ServiceAnnotations != nil {
+		if service.Annotations == nil {
+			service.Annotations = make(map[string]string, len(connectionPoolerSpec.ServiceAnnotations))
+		}
+		for k, v := range connectionPoolerSpec.ServiceAnnotations {
+			service.Annotations[k] = v
+		}
+	}
+
 	return service
 }
 

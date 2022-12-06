@@ -248,10 +248,10 @@ type ConnectionPoolerParameters struct {
 	MaxDBConnections              *int32            `json:"maxDBConnections,omitempty"`
 	Mode                          string            `json:"mode,omitempty"`
 	EnableLoadBalancerService     *bool             `json:"enableLoadBalancerService,omitempty"`
-	ServiceAnnotations            map[string]string `json:"serviceAnnotations,omitempty"`
 	Target                        string            `json:"target,omitempty"`
 	PodLabels                     map[string]string `json:"podLabels,omitempty"`
 	PodAnnotations                map[string]string `json:"podAnnotations,omitempty"`
+	ServiceAnnotations            map[string]string `json:"serviceAnnotations,omitempty"`
 	DisablePostgresPodAnnotations bool              `json:"disablePostgresPodAnnotations,omitempty"`
 
 	*Resources `json:"resources,omitempty"`
