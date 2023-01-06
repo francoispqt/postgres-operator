@@ -8,7 +8,7 @@ require (
 	github.com/lib/pq v1.10.4
 	github.com/motomux/pretty v0.0.0-20161209205251-b2aad2c9a95d
 	github.com/pkg/errors v0.9.1
-	github.com/r3labs/diff v1.1.0
+	github.com/r3labs/diff/v3 v3.0.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0
 	golang.org/x/crypto v0.0.0-20211202192323-5770296d904e
@@ -47,6 +47,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	golang.org/x/mod v0.5.1 // indirect
 	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 // indirect
 	golang.org/x/oauth2 v0.0.0-20210402161424-2e8d93401602 // indirect

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/r3labs/diff"
+	diff "github.com/r3labs/diff/v3"
 	"github.com/sirupsen/logrus"
 	acidzalando "github.com/zalando/postgres-operator/pkg/apis/acid.zalan.do"
 	acidv1 "github.com/zalando/postgres-operator/pkg/apis/acid.zalan.do/v1"
