@@ -253,6 +253,7 @@ type ConnectionPoolerParameters struct {
 	PodAnnotations                map[string]string `json:"podAnnotations,omitempty"`
 	ServiceAnnotations            map[string]string `json:"serviceAnnotations,omitempty"`
 	DisablePostgresPodAnnotations bool              `json:"disablePostgresPodAnnotations,omitempty"`
+	NodeAffinity                  *v1.NodeAffinity  `json:"nodeAffinity,omitempty"`
 
 	*Resources `json:"resources,omitempty"`
 }

@@ -319,7 +319,12 @@ func (c *Cluster) generateConnectionPoolerPodTemplate(role PostgresRole, connect
 		},
 	}
 
-	nodeAffinity := c.nodeAffinity(c.OpConfig.NodeReadinessLabel, spec.NodeAffinity)
+	specNodeAffinity := connectionPoolerSpec.NodeAffinity
+	if specNodeAffinity == nil {
+		specNodeAffinity = spec.NodeAffinity
+	}
+
+	nodeAffinity := c.nodeAffinity(c.OpConfig.NodeReadinessLabel, specNodeAffinity)
 	if c.OpConfig.EnablePodAntiAffinity {
 		labelsSet := labels.Set(podLabels)
 		podTemplate.Spec.Affinity = generatePodAffinity(
