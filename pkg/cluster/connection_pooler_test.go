@@ -1131,9 +1131,9 @@ func testResources(cluster *Cluster, podSpec *v1.PodTemplateSpec, role PostgresR
 func testLabels(cluster *Cluster, podSpec *v1.PodTemplateSpec, role PostgresRole, poolerName string) error {
 	poolerLabels := podSpec.ObjectMeta.Labels["connection-pooler"]
 	connectionPooler := &ConnectionPoolerObjects{Role: role, FullName: poolerName, Spec: &ConnectionPoolerSpec{}}
-	if poolerLabels != cluster.connectionPoolerLabels(connectionPooler, true).MatchLabels["connection-pooler"] {
+	if poolerLabels != cluster.connectionPoolerLabels(connectionPooler, connectionPooler.Spec, true).MatchLabels["connection-pooler"] {
 		return fmt.Errorf("Pod labels do not match, got %+v, expected %+v",
-			podSpec.ObjectMeta.Labels, cluster.connectionPoolerLabels(connectionPooler, true).MatchLabels)
+			podSpec.ObjectMeta.Labels, cluster.connectionPoolerLabels(connectionPooler, connectionPooler.Spec, true).MatchLabels)
 	}
 
 	return nil
@@ -1142,7 +1142,7 @@ func testLabels(cluster *Cluster, podSpec *v1.PodTemplateSpec, role PostgresRole
 func testSelector(cluster *Cluster, deployment *appsv1.Deployment, poolerName string) error {
 	labels := deployment.Spec.Selector.MatchLabels
 	connectionPooler := &ConnectionPoolerObjects{Role: Master, FullName: poolerName, Spec: &ConnectionPoolerSpec{}}
-	expected := cluster.connectionPoolerLabels(connectionPooler, true).MatchLabels
+	expected := cluster.connectionPoolerLabels(connectionPooler, connectionPooler.Spec, true).MatchLabels
 
 	if labels["connection-pooler"] != expected["connection-pooler"] {
 		return fmt.Errorf("Labels are incorrect, got %+v, expected %+v",

@@ -109,7 +109,7 @@ func (c *Cluster) poolerLabelsSet(addExtraLabels bool) labels.Set {
 // have e.g. different `application` label, so that recreatePod operation will
 // not interfere with it (it lists all the pods via labels, and if there would
 // be no difference, it will recreate also pooler pods).
-func (c *Cluster) connectionPoolerLabels(connectionPooler *ConnectionPoolerObjects, addExtraLabels bool) *metav1.LabelSelector {
+func (c *Cluster) connectionPoolerLabels(connectionPooler *ConnectionPoolerObjects, connectionPoolerSpec *ConnectionPoolerSpec, addExtraLabels bool) *metav1.LabelSelector {
 	poolerLabelsSet := c.poolerLabelsSet(addExtraLabels)
 
 	// TODO should be config values
@@ -122,8 +122,8 @@ func (c *Cluster) connectionPoolerLabels(connectionPooler *ConnectionPoolerObjec
 		poolerLabelsSet = labels.Merge(poolerLabelsSet, extraLabels)
 	}
 
-	if connectionPooler.Spec != nil {
-		for labelk, labelv := range connectionPooler.Spec.ConnectionPoolerParameters.PodLabels {
+	if connectionPoolerSpec != nil {
+		for labelk, labelv := range connectionPoolerSpec.PodLabels {
 			poolerLabelsSet[labelk] = labelv
 		}
 	}
@@ -343,7 +343,7 @@ func (c *Cluster) generateConnectionPoolerPodTemplate(role PostgresRole, connect
 func (c *Cluster) generateConnectionPoolerDeployment(connectionPooler *ConnectionPoolerObjects, connectionPoolerSpec *ConnectionPoolerSpec) (
 	*appsv1.Deployment, error) {
 
-	podLabelSelector := c.connectionPoolerLabels(connectionPooler, true)
+	podLabelSelector := c.connectionPoolerLabels(connectionPooler, connectionPoolerSpec, true)
 
 	// there are two ways to enable connection pooler, either to specify a
 	// connectionPooler section or enableConnectionPooler. In the second case
@@ -406,7 +406,7 @@ func (c *Cluster) generateConnectionPoolerService(connectionPooler *ConnectionPo
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        connectionPooler.FullName,
 			Namespace:   connectionPooler.Namespace,
-			Labels:      c.connectionPoolerLabels(connectionPooler, false).MatchLabels,
+			Labels:      c.connectionPoolerLabels(connectionPooler, connectionPoolerSpec, false).MatchLabels,
 			Annotations: c.annotationsSet(c.generateServiceAnnotations(connectionPooler.Role, spec, connectionPooler.Name)),
 			// make StatefulSet object its owner to represent the dependency.
 			// By itself StatefulSet is being deleted with "Orphaned"
@@ -758,8 +758,10 @@ func (c *Cluster) buildConnectionPoolerSpec(spec *acidv1.PostgresSpec, role Post
 		connectionPoolerDefaults = &acidv1.ConnectionPooler{}
 	}
 
+	connectionPoolerParametersCopy := connectionPoolerParameters.DeepCopy()
+
 	connectionPoolerSpec.ConnectionPooler = acidv1.ConnectionPooler{
-		ConnectionPoolerParameters: *connectionPoolerParameters,
+		ConnectionPoolerParameters: *connectionPoolerParametersCopy,
 		ConnectionPoolerAuth:       c.ConnectionPoolers.Auth,
 	}
 
@@ -1049,7 +1051,7 @@ func (c *Cluster) syncConnectionPoolerWorker(oldSpec, newSpec *acidv1.Postgresql
 
 	// check if pooler pods must be replaced due to secret update
 	listOptions := metav1.ListOptions{
-		LabelSelector: labels.Set(c.connectionPoolerLabels(connectionPooler, true).MatchLabels).String(),
+		LabelSelector: labels.Set(c.connectionPoolerLabels(connectionPooler, newConnectionPoolerSpec, true).MatchLabels).String(),
 	}
 	pods, err = c.listPoolerPods(listOptions)
 	if err != nil {
