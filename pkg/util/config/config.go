@@ -52,6 +52,7 @@ type Resources struct {
 	DefaultMemoryRequest          string              `name:"default_memory_request" default:"100Mi"`
 	DefaultCPULimit               string              `name:"default_cpu_limit" default:"1"`
 	DefaultMemoryLimit            string              `name:"default_memory_limit" default:"500Mi"`
+	DisableDefaultResources       bool                `name:"disable_default_resources"`
 	MinCPULimit                   string              `name:"min_cpu_limit" default:"250m"`
 	MinMemoryLimit                string              `name:"min_memory_limit" default:"250Mi"`
 	MaxCPURequest                 string              `name:"max_cpu_request"`

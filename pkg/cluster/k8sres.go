@@ -222,7 +222,7 @@ func setMemoryRequestToLimit(resources *v1.ResourceRequirements, containerName s
 	}
 }
 
-func fillResourceList(spec acidv1.ResourceDescription, defaults acidv1.ResourceDescription) (v1.ResourceList, error) {
+func fillResourceList(spec acidv1.ResourceDescription, defaults acidv1.ResourceDescription, disableDefaultResources bool) (v1.ResourceList, error) {
 	var err error
 	requests := v1.ResourceList{}
 
@@ -231,7 +231,7 @@ func fillResourceList(spec acidv1.ResourceDescription, defaults acidv1.ResourceD
 		if err != nil {
 			return nil, fmt.Errorf("could not parse CPU quantity: %v", err)
 		}
-	} else {
+	} else if !disableDefaultResources {
 		requests[v1.ResourceCPU], err = resource.ParseQuantity(defaults.CPU)
 		if err != nil {
 			return nil, fmt.Errorf("could not parse default CPU quantity: %v", err)
@@ -242,7 +242,7 @@ func fillResourceList(spec acidv1.ResourceDescription, defaults acidv1.ResourceD
 		if err != nil {
 			return nil, fmt.Errorf("could not parse memory quantity: %v", err)
 		}
-	} else {
+	} else if !disableDefaultResources {
 		requests[v1.ResourceMemory], err = resource.ParseQuantity(defaults.Memory)
 		if err != nil {
 			return nil, fmt.Errorf("could not parse default memory quantity: %v", err)
@@ -266,18 +266,26 @@ func (c *Cluster) generateResourceRequirements(
 		specLimits = resources.ResourceLimits
 	}
 
-	result.Requests, err = fillResourceList(specRequests, defaultResources.ResourceRequests)
+	result.Requests, err = fillResourceList(
+		specRequests,
+		defaultResources.ResourceRequests,
+		c.OpConfig.DisableDefaultResources,
+	)
 	if err != nil {
 		return nil, fmt.Errorf("could not fill resource requests: %v", err)
 	}
 
-	result.Limits, err = fillResourceList(specLimits, defaultResources.ResourceLimits)
+	result.Limits, err = fillResourceList(
+		specLimits,
+		defaultResources.ResourceLimits,
+		c.OpConfig.DisableDefaultResources,
+	)
 	if err != nil {
 		return nil, fmt.Errorf("could not fill resource limits: %v", err)
 	}
 
 	// enforce minimum cpu and memory limits for Postgres containers only
-	if containerName == constants.PostgresContainerName {
+	if containerName == constants.PostgresContainerName && !c.OpConfig.DisableDefaultResources {
 		if err = c.enforceMinResourceLimits(&result); err != nil {
 			return nil, fmt.Errorf("could not enforce minimum resource limits: %v", err)
 		}
@@ -288,7 +296,7 @@ func (c *Cluster) generateResourceRequirements(
 	}
 
 	// enforce maximum cpu and memory requests for Postgres containers only
-	if containerName == constants.PostgresContainerName {
+	if containerName == constants.PostgresContainerName && !c.OpConfig.DisableDefaultResources {
 		if err = c.enforceMaxResourceRequests(&result); err != nil {
 			return nil, fmt.Errorf("could not enforce maximum resource requests: %v", err)
 		}

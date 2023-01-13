@@ -370,6 +370,9 @@ spec:
                     type: string
                     pattern: '^(\d+(e\d+)?|\d+(\.\d+)?(e\d+)?[EPTGMK]i?)$'
                     default: "250Mi"
+                  disable_default_resources:
+                    type: boolean
+                    default: false
               timeouts:
                 type: object
                 properties:

@@ -963,7 +963,7 @@ func TestConnectionPoolerPodSpec(t *testing.T) {
 
 			podSpec, err := tt.cluster.generateConnectionPoolerPodTemplate(role, tt.poolerName, poolerSpec, nil)
 
-			if err != tt.expected && err.Error() != tt.expected.Error() {
+			if err != tt.expected && (err == nil || err.Error() != tt.expected.Error()) {
 				t.Errorf("%s [%s]: Could not generate pod template,\n %+v, expected\n %+v",
 					testName, tt.subTest, err, tt.expected)
 			}

@@ -424,7 +424,7 @@ configuration they are grouped under the `kubernetes` key.
   environment if they not if conflict with the environment variables generated
   by the operator. The WAL location (bucket path) can be overridden, though.
   The default is empty.
-  
+
 * **pod_environment_secret**
   similar to pod_environment_configmap but referencing a secret with custom
   environment variables. Because the secret is not allowed to exist in a
@@ -534,6 +534,10 @@ CRD-based configuration.
   hard memory minimum what we consider to be required to properly run Postgres
   clusters with Patroni on Kubernetes. The default is `250Mi`.
 
+* **disbale_default_resources**
+  disables completely default resources if you want not to set limits or requests.
+
+
 ## Operator timeouts
 
 This set of parameters define various timeouts related to some operator
@@ -543,7 +547,7 @@ effect, and the parameters are grouped under the `timeouts` key in the
 CRD-based configuration.
 
 * **PatroniAPICheckInterval**
-  the interval between consecutive attempts waiting for the return of 
+  the interval between consecutive attempts waiting for the return of
   Patroni Api. The default is `1s`.
 
 * **PatroniAPICheckTimeout**
@@ -741,7 +745,7 @@ grouped under the `logical_backup` key.
   is specified, no argument will be passed to `aws s3` command. Default: "AES256".
 
 * **logical_backup_s3_retention_time**
-  Specify a retention time for logical backups stored in S3. Backups older than the specified retention 
+  Specify a retention time for logical backups stored in S3. Backups older than the specified retention
   time will be deleted after a new backup was uploaded. If empty, all backups will be kept. Example values are
   "3 days", "2 weeks", or "1 month". The default is empty.
 
