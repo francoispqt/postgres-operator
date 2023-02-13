@@ -288,7 +288,7 @@ func (c *Cluster) generateConnectionPoolerPodTemplate(role PostgresRole, connect
 		},
 	}
 
-	tolerationsSpec := tolerations(&spec.Tolerations, c.OpConfig.PodToleration)
+	tolerationsSpec := tolerations(&connectionPoolerSpec.Tolerations, c.OpConfig.PodToleration)
 
 	var specForPodAnnotation *acidv1.PostgresSpec
 	var podAnnotations map[string]string
