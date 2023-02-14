@@ -268,6 +268,50 @@ var PostgresCRDResourceValidation = apiextv1.CustomResourceValidation{
 									},
 								},
 							},
+							"tolerations": {
+								Type: "array",
+								Items: &apiextv1.JSONSchemaPropsOrArray{
+									Schema: &apiextv1.JSONSchemaProps{
+										Type: "object",
+										Properties: map[string]apiextv1.JSONSchemaProps{
+											"key": {
+												Type: "string",
+											},
+											"operator": {
+												Type: "string",
+												Enum: []apiextv1.JSON{
+													{
+														Raw: []byte(`"Equal"`),
+													},
+													{
+														Raw: []byte(`"Exists"`),
+													},
+												},
+											},
+											"value": {
+												Type: "string",
+											},
+											"effect": {
+												Type: "string",
+												Enum: []apiextv1.JSON{
+													{
+														Raw: []byte(`"NoExecute"`),
+													},
+													{
+														Raw: []byte(`"NoSchedule"`),
+													},
+													{
+														Raw: []byte(`"PreferNoSchedule"`),
+													},
+												},
+											},
+											"tolerationSeconds": {
+												Type: "integer",
+											},
+										},
+									},
+								},
+							},
 							"schema": {
 								Type: "string",
 							},
@@ -370,6 +414,50 @@ var PostgresCRDResourceValidation = apiextv1.CustomResourceValidation{
 													"memory": {
 														Type:    "string",
 														Pattern: "^(\\d+(e\\d+)?|\\d+(\\.\\d+)?(e\\d+)?[EPTGMK]i?)$",
+													},
+												},
+											},
+										},
+									},
+									"tolerations": {
+										Type: "array",
+										Items: &apiextv1.JSONSchemaPropsOrArray{
+											Schema: &apiextv1.JSONSchemaProps{
+												Type: "object",
+												Properties: map[string]apiextv1.JSONSchemaProps{
+													"key": {
+														Type: "string",
+													},
+													"operator": {
+														Type: "string",
+														Enum: []apiextv1.JSON{
+															{
+																Raw: []byte(`"Equal"`),
+															},
+															{
+																Raw: []byte(`"Exists"`),
+															},
+														},
+													},
+													"value": {
+														Type: "string",
+													},
+													"effect": {
+														Type: "string",
+														Enum: []apiextv1.JSON{
+															{
+																Raw: []byte(`"NoExecute"`),
+															},
+															{
+																Raw: []byte(`"NoSchedule"`),
+															},
+															{
+																Raw: []byte(`"PreferNoSchedule"`),
+															},
+														},
+													},
+													"tolerationSeconds": {
+														Type: "integer",
 													},
 												},
 											},
