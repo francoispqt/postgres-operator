@@ -288,7 +288,15 @@ func (c *Cluster) generateConnectionPoolerPodTemplate(role PostgresRole, connect
 		},
 	}
 
-	tolerationsSpec := tolerations(&connectionPoolerSpec.Tolerations, c.OpConfig.PodToleration)
+	var tolerationsSpec []v1.Toleration
+
+	// backwards compatibility: if present, connectionPooler tolerations
+	// take precedence over cluster tolerations.
+	if connectionPoolerSpec.Tolerations != nil {
+		tolerationsSpec = tolerations(&connectionPoolerSpec.Tolerations, c.OpConfig.PodToleration)
+	} else if spec.Tolerations != nil {
+		tolerationsSpec = tolerations(&spec.Tolerations, c.OpConfig.PodToleration)
+	}
 
 	var specForPodAnnotation *acidv1.PostgresSpec
 	var podAnnotations map[string]string
