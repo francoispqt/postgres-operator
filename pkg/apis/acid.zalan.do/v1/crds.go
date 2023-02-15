@@ -237,6 +237,9 @@ var PostgresCRDResourceValidation = apiextv1.CustomResourceValidation{
 								Type:    "integer",
 								Minimum: &min1,
 							},
+							"enableLoadBalancerService": {
+								Type: "boolean",
+							},
 							"resources": {
 								Type: "object",
 								Properties: map[string]apiextv1.JSONSchemaProps{
@@ -312,6 +315,147 @@ var PostgresCRDResourceValidation = apiextv1.CustomResourceValidation{
 									},
 								},
 							},
+							"nodeAffinity": {
+								Type: "object",
+								Properties: map[string]apiextv1.JSONSchemaProps{
+									"preferredDuringSchedulingIgnoredDuringExecution": {
+										Type: "array",
+										Items: &apiextv1.JSONSchemaPropsOrArray{
+											Schema: &apiextv1.JSONSchemaProps{
+												Type:     "object",
+												Required: []string{"preference", "weight"},
+												Properties: map[string]apiextv1.JSONSchemaProps{
+													"preference": {
+														Type: "object",
+														Properties: map[string]apiextv1.JSONSchemaProps{
+															"matchExpressions": {
+																Type: "array",
+																Items: &apiextv1.JSONSchemaPropsOrArray{
+																	Schema: &apiextv1.JSONSchemaProps{
+																		Type:     "object",
+																		Required: []string{"key", "operator"},
+																		Properties: map[string]apiextv1.JSONSchemaProps{
+																			"key": {
+																				Type: "string",
+																			},
+																			"operator": {
+																				Type: "string",
+																			},
+																			"values": {
+																				Type: "array",
+																				Items: &apiextv1.JSONSchemaPropsOrArray{
+																					Schema: &apiextv1.JSONSchemaProps{
+																						Type: "string",
+																					},
+																				},
+																			},
+																		},
+																	},
+																},
+															},
+															"matchFields": {
+																Type: "array",
+																Items: &apiextv1.JSONSchemaPropsOrArray{
+																	Schema: &apiextv1.JSONSchemaProps{
+																		Type:     "object",
+																		Required: []string{"key", "operator"},
+																		Properties: map[string]apiextv1.JSONSchemaProps{
+																			"key": {
+																				Type: "string",
+																			},
+																			"operator": {
+																				Type: "string",
+																			},
+																			"values": {
+																				Type: "array",
+																				Items: &apiextv1.JSONSchemaPropsOrArray{
+																					Schema: &apiextv1.JSONSchemaProps{
+																						Type: "string",
+																					},
+																				},
+																			},
+																		},
+																	},
+																},
+															},
+														},
+													},
+													"weight": {
+														Type:   "integer",
+														Format: "int32",
+													},
+												},
+											},
+										},
+									},
+									"requiredDuringSchedulingIgnoredDuringExecution": {
+										Type:     "object",
+										Required: []string{"nodeSelectorTerms"},
+										Properties: map[string]apiextv1.JSONSchemaProps{
+											"nodeSelectorTerms": {
+												Type: "array",
+												Items: &apiextv1.JSONSchemaPropsOrArray{
+													Schema: &apiextv1.JSONSchemaProps{
+														Type: "object",
+														Properties: map[string]apiextv1.JSONSchemaProps{
+															"matchExpressions": {
+																Type: "array",
+																Items: &apiextv1.JSONSchemaPropsOrArray{
+																	Schema: &apiextv1.JSONSchemaProps{
+																		Type:     "object",
+																		Required: []string{"key", "operator"},
+																		Properties: map[string]apiextv1.JSONSchemaProps{
+																			"key": {
+																				Type: "string",
+																			},
+																			"operator": {
+																				Type: "string",
+																			},
+																			"values": {
+																				Type: "array",
+																				Items: &apiextv1.JSONSchemaPropsOrArray{
+																					Schema: &apiextv1.JSONSchemaProps{
+																						Type: "string",
+																					},
+																				},
+																			},
+																		},
+																	},
+																},
+															},
+															"matchFields": {
+																Type: "array",
+																Items: &apiextv1.JSONSchemaPropsOrArray{
+																	Schema: &apiextv1.JSONSchemaProps{
+																		Type:     "object",
+																		Required: []string{"key", "operator"},
+																		Properties: map[string]apiextv1.JSONSchemaProps{
+																			"key": {
+																				Type: "string",
+																			},
+																			"operator": {
+																				Type: "string",
+																			},
+																			"values": {
+																				Type: "array",
+																				Items: &apiextv1.JSONSchemaPropsOrArray{
+																					Schema: &apiextv1.JSONSchemaProps{
+																						Type: "string",
+																					},
+																				},
+																			},
+																		},
+																	},
+																},
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
 							"schema": {
 								Type: "string",
 							},
@@ -381,10 +525,10 @@ var PostgresCRDResourceValidation = apiextv1.CustomResourceValidation{
 										Type: "string",
 										Enum: []apiextv1.JSON{
 											{
-												Raw: []byte(`"master"`),
+												Raw: []byte(`"replica"`),
 											},
 											{
-												Raw: []byte(`"replica"`),
+												Raw: []byte(`"master"`),
 											},
 										},
 									},

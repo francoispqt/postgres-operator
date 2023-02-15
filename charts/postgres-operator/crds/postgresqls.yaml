@@ -175,11 +175,126 @@ spec:
                     type: string
                   user:
                     type: string
+                  nodeAffinity:
+                    type: object
+                    properties:
+                      preferredDuringSchedulingIgnoredDuringExecution:
+                        type: array
+                        items:
+                          type: object
+                          required:
+                          - preference
+                          - weight
+                          properties:
+                            preference:
+                              type: object
+                              properties:
+                                matchExpressions:
+                                  type: array
+                                  items:
+                                    type: object
+                                    required:
+                                    - key
+                                    - operator
+                                    properties:
+                                      key:
+                                        type: string
+                                      operator:
+                                        type: string
+                                      values:
+                                        type: array
+                                        items:
+                                          type: string
+                                matchFields:
+                                  type: array
+                                  items:
+                                    type: object
+                                    required:
+                                    - key
+                                    - operator
+                                    properties:
+                                      key:
+                                        type: string
+                                      operator:
+                                        type: string
+                                      values:
+                                        type: array
+                                        items:
+                                          type: string
+                            weight:
+                              format: int32
+                              type: integer
+                      requiredDuringSchedulingIgnoredDuringExecution:
+                        type: object
+                        required:
+                        - nodeSelectorTerms
+                        properties:
+                          nodeSelectorTerms:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                matchExpressions:
+                                  type: array
+                                  items:
+                                    type: object
+                                    required:
+                                    - key
+                                    - operator
+                                    properties:
+                                      key:
+                                        type: string
+                                      operator:
+                                        type: string
+                                      values:
+                                        type: array
+                                        items:
+                                          type: string
+                                matchFields:
+                                  type: array
+                                  items:
+                                    type: object
+                                    required:
+                                    - key
+                                    - operator
+                                    properties:
+                                      key:
+                                        type: string
+                                      operator:
+                                        type: string
+                                      values:
+                                        type: array
+                                        items:
+                                          type: string
+                  tolerations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        key:
+                          type: string
+                        operator:
+                          type: string
+                          enum:
+                            - Equal
+                            - Exists
+                        value:
+                          type: string
+                        effect:
+                          type: string
+                          enum:
+                            - NoExecute
+                            - NoSchedule
+                            - PreferNoSchedule
+                        tolerationSeconds:
+                          type: integer
               connectionPoolers:
                 type: object
                 additionalProperties:
                   type: object
                   properties:
+                    disablePostgresPodAnnotations:
+                      type: boolean
                     enableLoadBalancerService:
                       type: boolean
                     target:
@@ -192,6 +307,10 @@ spec:
                         type: string
                       type: object
                     podAnnotations:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    serviceAnnotations:
                       additionalProperties:
                         type: string
                       type: object
@@ -228,7 +347,119 @@ spec:
                             memory:
                               type: string
                               pattern: '^(\d+(e\d+)?|\d+(\.\d+)?(e\d+)?[EPTGMK]i?)$'
-
+                    nodeAffinity:
+                      type: object
+                      properties:
+                        preferredDuringSchedulingIgnoredDuringExecution:
+                          type: array
+                          items:
+                            type: object
+                            required:
+                            - preference
+                            - weight
+                            properties:
+                              preference:
+                                type: object
+                                properties:
+                                  matchExpressions:
+                                    type: array
+                                    items:
+                                      type: object
+                                      required:
+                                      - key
+                                      - operator
+                                      properties:
+                                        key:
+                                          type: string
+                                        operator:
+                                          type: string
+                                        values:
+                                          type: array
+                                          items:
+                                            type: string
+                                  matchFields:
+                                    type: array
+                                    items:
+                                      type: object
+                                      required:
+                                      - key
+                                      - operator
+                                      properties:
+                                        key:
+                                          type: string
+                                        operator:
+                                          type: string
+                                        values:
+                                          type: array
+                                          items:
+                                            type: string
+                              weight:
+                                format: int32
+                                type: integer
+                        requiredDuringSchedulingIgnoredDuringExecution:
+                          type: object
+                          required:
+                          - nodeSelectorTerms
+                          properties:
+                            nodeSelectorTerms:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  matchExpressions:
+                                    type: array
+                                    items:
+                                      type: object
+                                      required:
+                                      - key
+                                      - operator
+                                      properties:
+                                        key:
+                                          type: string
+                                        operator:
+                                          type: string
+                                        values:
+                                          type: array
+                                          items:
+                                            type: string
+                                  matchFields:
+                                    type: array
+                                    items:
+                                      type: object
+                                      required:
+                                      - key
+                                      - operator
+                                      properties:
+                                        key:
+                                          type: string
+                                        operator:
+                                          type: string
+                                        values:
+                                          type: array
+                                          items:
+                                            type: string
+                    tolerations:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          key:
+                            type: string
+                          operator:
+                            type: string
+                            enum:
+                              - Equal
+                              - Exists
+                          value:
+                            type: string
+                          effect:
+                            type: string
+                            enum:
+                              - NoExecute
+                              - NoSchedule
+                              - PreferNoSchedule
+                          tolerationSeconds:
+                            type: integer
               databases:
                 type: object
                 additionalProperties:
