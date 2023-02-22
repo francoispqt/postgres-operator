@@ -222,6 +222,12 @@ var PostgresCRDResourceValidation = apiextv1.CustomResourceValidation{
 							"maxDBConnections": {
 								Type: "integer",
 							},
+							"defaultPoolSize": {
+								Type: "integer",
+							},
+							"disableReservePool": {
+								Type: "boolean",
+							},
 							"mode": {
 								Type: "string",
 								Enum: []apiextv1.JSON{
@@ -475,6 +481,12 @@ var PostgresCRDResourceValidation = apiextv1.CustomResourceValidation{
 									},
 									"maxDBConnections": {
 										Type: "integer",
+									},
+									"defaultPoolSize": {
+										Type: "integer",
+									},
+									"disableReservePool": {
+										Type: "boolean",
 									},
 									"mode": {
 										Type: "string",

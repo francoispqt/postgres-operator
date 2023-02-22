@@ -3,6 +3,7 @@ package cluster
 import (
 	"errors"
 	"fmt"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -11,6 +12,7 @@ import (
 	fakeacidv1 "github.com/zalando/postgres-operator/pkg/generated/clientset/versioned/fake"
 	"github.com/zalando/postgres-operator/pkg/util"
 	"github.com/zalando/postgres-operator/pkg/util/config"
+	"github.com/zalando/postgres-operator/pkg/util/constants"
 	"github.com/zalando/postgres-operator/pkg/util/k8sutil"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -24,6 +26,10 @@ func mockInstallLookupFunction(schema string, user string) error {
 }
 
 func boolToPointer(value bool) *bool {
+	return &value
+}
+
+func intToPointer(value int32) *int32 {
 	return &value
 }
 
@@ -1253,6 +1259,82 @@ func TestConnectionPoolerServiceSpec(t *testing.T) {
 				t.Errorf("%s [%s]: Service spec is incorrect, %+v",
 					testName, tt.subTest, err)
 			}
+		}
+	}
+}
+
+func TestGetConnectionPoolerEnvVars(t *testing.T) {
+	poolerMode := "session"
+	maxDBConn := 100
+	numberOfInstances := 2
+
+	testCases := []struct {
+		testName           string
+		mode               string
+		defaultPoolSize    *int32
+		disableReservePool bool
+		maxDBConn          int32
+		numberOfInstances  int32
+		expectedResult     []v1.EnvVar
+	}{
+		{
+			testName:           "no-default-pool-size",
+			mode:               poolerMode,
+			defaultPoolSize:    nil,
+			disableReservePool: false,
+			maxDBConn:          int32(maxDBConn),
+			numberOfInstances:  int32(numberOfInstances),
+			expectedResult: []v1.EnvVar{
+				{Name: "CONNECTION_POOLER_PORT", Value: "5432"},
+				{Name: "CONNECTION_POOLER_MODE", Value: poolerMode},
+				{Name: "CONNECTION_POOLER_DEFAULT_SIZE", Value: "25"},
+				{Name: "CONNECTION_POOLER_MIN_SIZE", Value: "12"},
+				{Name: "CONNECTION_POOLER_RESERVE_SIZE", Value: "12"},
+				{Name: "CONNECTION_POOLER_MAX_CLIENT_CONN", Value: fmt.Sprint(constants.ConnectionPoolerMaxClientConnections)},
+				{Name: "CONNECTION_POOLER_MAX_DB_CONN", Value: "50"},
+			},
+		},
+		{
+			testName:           "default-pool-size",
+			mode:               poolerMode,
+			defaultPoolSize:    intToPointer(100),
+			disableReservePool: false,
+			maxDBConn:          int32(maxDBConn),
+			numberOfInstances:  int32(numberOfInstances),
+			expectedResult: []v1.EnvVar{
+				{Name: "CONNECTION_POOLER_PORT", Value: "5432"},
+				{Name: "CONNECTION_POOLER_MODE", Value: poolerMode},
+				{Name: "CONNECTION_POOLER_DEFAULT_SIZE", Value: "100"},
+				{Name: "CONNECTION_POOLER_MIN_SIZE", Value: "50"},
+				{Name: "CONNECTION_POOLER_RESERVE_SIZE", Value: "50"},
+				{Name: "CONNECTION_POOLER_MAX_CLIENT_CONN", Value: fmt.Sprint(constants.ConnectionPoolerMaxClientConnections)},
+				{Name: "CONNECTION_POOLER_MAX_DB_CONN", Value: "50"},
+			},
+		},
+		{
+			testName:           "enable-reserve-pool",
+			mode:               poolerMode,
+			defaultPoolSize:    nil,
+			disableReservePool: true,
+			maxDBConn:          int32(maxDBConn),
+			numberOfInstances:  int32(numberOfInstances),
+			expectedResult: []v1.EnvVar{
+				{Name: "CONNECTION_POOLER_PORT", Value: "5432"},
+				{Name: "CONNECTION_POOLER_MODE", Value: poolerMode},
+				{Name: "CONNECTION_POOLER_DEFAULT_SIZE", Value: "25"},
+				{Name: "CONNECTION_POOLER_MIN_SIZE", Value: "12"},
+				{Name: "CONNECTION_POOLER_RESERVE_SIZE", Value: "0"},
+				{Name: "CONNECTION_POOLER_MAX_CLIENT_CONN", Value: fmt.Sprint(constants.ConnectionPoolerMaxClientConnections)},
+				{Name: "CONNECTION_POOLER_MAX_DB_CONN", Value: "50"},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		cluster := &Cluster{}
+		result := cluster.getConnectionPoolerEnvVars(tc.mode, tc.defaultPoolSize, tc.disableReservePool, tc.maxDBConn, tc.numberOfInstances)
+		if !reflect.DeepEqual(result, tc.expectedResult) {
+			t.Errorf("[%s] Expected: %v, but got: %v", tc.testName, tc.expectedResult, result)
 		}
 	}
 }

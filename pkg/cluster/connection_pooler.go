@@ -156,31 +156,43 @@ func (c *Cluster) createConnectionPooler(LookupFunction InstallFunction) (SyncRe
 	return reason, nil
 }
 
-//
 // Generate pool size related environment variables.
 //
 // MAX_DB_CONN would specify the global maximum for connections to a target
-// 	database.
+//
+//	database.
 //
 // MAX_CLIENT_CONN is not configurable at the moment, just set it high enough.
 //
 // DEFAULT_SIZE is a pool size per db/user (having in mind the use case when
-// 	most of the queries coming through a connection pooler are from the same
-// 	user to the same db). In case if we want to spin up more connection pooler
-// 	instances, take this into account and maintain the same number of
-// 	connections.
+//
+//	most of the queries coming through a connection pooler are from the same
+//	user to the same db). In case if we want to spin up more connection pooler
+//	instances, take this into account and maintain the same number of
+//	connections. This parameter can be overriden by providing a static pool size
+//	value independent from MAX_DB_CONN.
 //
 // MIN_SIZE is a pool's minimal size, to prevent situation when sudden workload
-// 	have to wait for spinning up a new connections.
 //
-// RESERVE_SIZE is how many additional connections to allow for a pooler.
-func (c *Cluster) getConnectionPoolerEnvVars(mode string, maxDBConn int32, numberOfInstances int32) []v1.EnvVar {
-
+//	have to wait for spinning up a new connections.
+//
+// RESERVE_SIZE is how many additional connections to allow for a pooler. Enabled by default.
+func (c *Cluster) getConnectionPoolerEnvVars(mode string, defaultPoolSize *int32, disableReservePool bool, maxDBConn int32, numberOfInstances int32) []v1.EnvVar {
 	maxDBConn = maxDBConn / numberOfInstances
 
 	defaultSize := maxDBConn / 2
+	if defaultPoolSize != nil && *defaultPoolSize != 0 {
+		defaultSize = *defaultPoolSize
+	}
+
 	minSize := defaultSize / 2
-	reserveSize := minSize
+
+	var reservePoolSize int32
+	if !disableReservePool {
+		reservePoolSize = minSize
+	} else {
+		reservePoolSize = 0 // disabled
+	}
 
 	return []v1.EnvVar{
 		{
@@ -201,7 +213,7 @@ func (c *Cluster) getConnectionPoolerEnvVars(mode string, maxDBConn int32, numbe
 		},
 		{
 			Name:  "CONNECTION_POOLER_RESERVE_SIZE",
-			Value: fmt.Sprint(reserveSize),
+			Value: fmt.Sprint(reservePoolSize),
 		},
 		{
 			Name:  "CONNECTION_POOLER_MAX_CLIENT_CONN",
@@ -260,6 +272,8 @@ func (c *Cluster) generateConnectionPoolerPodTemplate(role PostgresRole, connect
 		envVars,
 		c.getConnectionPoolerEnvVars(
 			connectionPoolerSpec.Mode,
+			connectionPoolerSpec.DefaultPoolSize,
+			connectionPoolerSpec.DisableReservePool,
 			*connectionPoolerSpec.MaxDBConnections,
 			*connectionPoolerSpec.NumberOfInstances,
 		)...)
@@ -473,7 +487,7 @@ func (c *Cluster) listPoolerPods(listOptions metav1.ListOptions) ([]v1.Pod, erro
 	return pods.Items, nil
 }
 
-//delete connection pooler
+// delete connection pooler
 func (c *Cluster) deleteConnectionPooler(connectionPooler *ConnectionPoolerObjects) (err error) {
 	c.logger.Infof("deleting connection pooler connection-pooler=%s spilo-role=%s", connectionPooler.Name, connectionPooler.Role)
 
@@ -532,7 +546,7 @@ func (c *Cluster) deleteConnectionPooler(connectionPooler *ConnectionPoolerObjec
 	return nil
 }
 
-//delete connection pooler
+// delete connection pooler
 func (c *Cluster) deleteConnectionPoolerSecret() (err error) {
 	// Repeat the same for the secret object
 	secretName := c.credentialSecretName(c.OpConfig.ConnectionPooler.User)
@@ -581,7 +595,7 @@ func updateConnectionPoolerDeployment(KubeClient k8sutil.KubernetesClient, newDe
 	return deployment, nil
 }
 
-//updateConnectionPoolerAnnotations updates the annotations of connection pooler deployment
+// updateConnectionPoolerAnnotations updates the annotations of connection pooler deployment
 func updateConnectionPoolerAnnotations(KubeClient k8sutil.KubernetesClient, deployment *appsv1.Deployment, annotations map[string]string) (*appsv1.Deployment, error) {
 	patchData, err := metaAnnotationsPatch(annotations)
 	if err != nil {
