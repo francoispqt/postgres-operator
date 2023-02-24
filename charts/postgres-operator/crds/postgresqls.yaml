@@ -142,6 +142,10 @@ spec:
                     type: string
                   maxDBConnections:
                     type: integer
+                  defaultPoolSize:
+                    type: integer
+                  disableReservePool:
+                    type: boolean
                   mode:
                     type: string
                     enum:
@@ -318,6 +322,10 @@ spec:
                       type: string
                     maxDBConnections:
                       type: integer
+                    defaultPoolSize:
+                      type: integer
+                    disableReservePool:
+                      type: boolean
                     mode:
                       type: string
                       enum:
