@@ -177,12 +177,12 @@ func (c *Cluster) createConnectionPooler(LookupFunction InstallFunction) (SyncRe
 //	have to wait for spinning up a new connections.
 //
 // RESERVE_SIZE is how many additional connections to allow for a pooler. Enabled by default.
-func (c *Cluster) getConnectionPoolerEnvVars(mode string, defaultPoolSize *int32, disableReservePool bool, maxDBConn int32, numberOfInstances int32) []v1.EnvVar {
+func (c *Cluster) getConnectionPoolerEnvVars(mode string, poolSize *int32, disableReservePool bool, maxDBConn int32, numberOfInstances int32) []v1.EnvVar {
 	maxDBConn = maxDBConn / numberOfInstances
 
 	defaultSize := maxDBConn / 2
-	if defaultPoolSize != nil && *defaultPoolSize != 0 {
-		defaultSize = *defaultPoolSize
+	if poolSize != nil && *poolSize != 0 {
+		defaultSize = *poolSize / numberOfInstances
 	}
 
 	minSize := defaultSize / 2
@@ -272,7 +272,7 @@ func (c *Cluster) generateConnectionPoolerPodTemplate(role PostgresRole, connect
 		envVars,
 		c.getConnectionPoolerEnvVars(
 			connectionPoolerSpec.Mode,
-			connectionPoolerSpec.DefaultPoolSize,
+			connectionPoolerSpec.PoolSize,
 			connectionPoolerSpec.DisableReservePool,
 			*connectionPoolerSpec.MaxDBConnections,
 			*connectionPoolerSpec.NumberOfInstances,

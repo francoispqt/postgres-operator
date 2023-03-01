@@ -142,7 +142,7 @@ spec:
                     type: string
                   maxDBConnections:
                     type: integer
-                  defaultPoolSize:
+                  poolSize:
                     type: integer
                   disableReservePool:
                     type: boolean
@@ -322,7 +322,7 @@ spec:
                       type: string
                     maxDBConnections:
                       type: integer
-                    defaultPoolSize:
+                    poolSize:
                       type: integer
                     disableReservePool:
                       type: boolean

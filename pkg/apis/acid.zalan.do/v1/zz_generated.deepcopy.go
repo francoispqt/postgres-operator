@@ -166,6 +166,11 @@ func (in *ConnectionPoolerParameters) DeepCopyInto(out *ConnectionPoolerParamete
 		*out = new(int32)
 		**out = **in
 	}
+	if in.PoolSize != nil {
+		in, out := &in.PoolSize, &out.PoolSize
+		*out = new(int32)
+		**out = **in
+	}
 	if in.EnableLoadBalancerService != nil {
 		in, out := &in.EnableLoadBalancerService, &out.EnableLoadBalancerService
 		*out = new(bool)
@@ -196,6 +201,13 @@ func (in *ConnectionPoolerParameters) DeepCopyInto(out *ConnectionPoolerParamete
 		in, out := &in.NodeAffinity, &out.NodeAffinity
 		*out = new(corev1.NodeAffinity)
 		(*in).DeepCopyInto(*out)
+	}
+	if in.Tolerations != nil {
+		in, out := &in.Tolerations, &out.Tolerations
+		*out = make([]corev1.Toleration, len(*in))
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
 	}
 	if in.Resources != nil {
 		in, out := &in.Resources, &out.Resources

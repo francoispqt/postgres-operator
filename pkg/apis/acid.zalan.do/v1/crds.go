@@ -222,7 +222,7 @@ var PostgresCRDResourceValidation = apiextv1.CustomResourceValidation{
 							"maxDBConnections": {
 								Type: "integer",
 							},
-							"defaultPoolSize": {
+							"poolSize": {
 								Type: "integer",
 							},
 							"disableReservePool": {
@@ -482,7 +482,7 @@ var PostgresCRDResourceValidation = apiextv1.CustomResourceValidation{
 									"maxDBConnections": {
 										Type: "integer",
 									},
-									"defaultPoolSize": {
+									"poolSize": {
 										Type: "integer",
 									},
 									"disableReservePool": {

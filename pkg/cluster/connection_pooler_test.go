@@ -1271,7 +1271,7 @@ func TestGetConnectionPoolerEnvVars(t *testing.T) {
 	testCases := []struct {
 		testName           string
 		mode               string
-		defaultPoolSize    *int32
+		poolSize           *int32
 		disableReservePool bool
 		maxDBConn          int32
 		numberOfInstances  int32
@@ -1280,7 +1280,7 @@ func TestGetConnectionPoolerEnvVars(t *testing.T) {
 		{
 			testName:           "no-default-pool-size",
 			mode:               poolerMode,
-			defaultPoolSize:    nil,
+			poolSize:           nil,
 			disableReservePool: false,
 			maxDBConn:          int32(maxDBConn),
 			numberOfInstances:  int32(numberOfInstances),
@@ -1297,16 +1297,16 @@ func TestGetConnectionPoolerEnvVars(t *testing.T) {
 		{
 			testName:           "default-pool-size",
 			mode:               poolerMode,
-			defaultPoolSize:    intToPointer(100),
+			poolSize:           intToPointer(100),
 			disableReservePool: false,
 			maxDBConn:          int32(maxDBConn),
 			numberOfInstances:  int32(numberOfInstances),
 			expectedResult: []v1.EnvVar{
 				{Name: "CONNECTION_POOLER_PORT", Value: "5432"},
 				{Name: "CONNECTION_POOLER_MODE", Value: poolerMode},
-				{Name: "CONNECTION_POOLER_DEFAULT_SIZE", Value: "100"},
-				{Name: "CONNECTION_POOLER_MIN_SIZE", Value: "50"},
-				{Name: "CONNECTION_POOLER_RESERVE_SIZE", Value: "50"},
+				{Name: "CONNECTION_POOLER_DEFAULT_SIZE", Value: "50"},
+				{Name: "CONNECTION_POOLER_MIN_SIZE", Value: "25"},
+				{Name: "CONNECTION_POOLER_RESERVE_SIZE", Value: "25"},
 				{Name: "CONNECTION_POOLER_MAX_CLIENT_CONN", Value: fmt.Sprint(constants.ConnectionPoolerMaxClientConnections)},
 				{Name: "CONNECTION_POOLER_MAX_DB_CONN", Value: "50"},
 			},
@@ -1314,7 +1314,7 @@ func TestGetConnectionPoolerEnvVars(t *testing.T) {
 		{
 			testName:           "enable-reserve-pool",
 			mode:               poolerMode,
-			defaultPoolSize:    nil,
+			poolSize:           nil,
 			disableReservePool: true,
 			maxDBConn:          int32(maxDBConn),
 			numberOfInstances:  int32(numberOfInstances),
@@ -1332,7 +1332,7 @@ func TestGetConnectionPoolerEnvVars(t *testing.T) {
 
 	for _, tc := range testCases {
 		cluster := &Cluster{}
-		result := cluster.getConnectionPoolerEnvVars(tc.mode, tc.defaultPoolSize, tc.disableReservePool, tc.maxDBConn, tc.numberOfInstances)
+		result := cluster.getConnectionPoolerEnvVars(tc.mode, tc.poolSize, tc.disableReservePool, tc.maxDBConn, tc.numberOfInstances)
 		if !reflect.DeepEqual(result, tc.expectedResult) {
 			t.Errorf("[%s] Expected: %v, but got: %v", tc.testName, tc.expectedResult, result)
 		}

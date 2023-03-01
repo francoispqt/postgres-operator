@@ -246,7 +246,7 @@ type ConnectionPoolerParameters struct {
 	NumberOfInstances             *int32            `json:"numberOfInstances,omitempty"`
 	DockerImage                   string            `json:"dockerImage,omitempty"`
 	MaxDBConnections              *int32            `json:"maxDBConnections,omitempty"`
-	DefaultPoolSize               *int32            `json:"defaultPoolSize,omitempty"`
+	PoolSize                      *int32            `json:"poolSize,omitempty"`
 	DisableReservePool            bool              `json:"disableReservePool,omitempty"`
 	Mode                          string            `json:"mode,omitempty"`
 	EnableLoadBalancerService     *bool             `json:"enableLoadBalancerService,omitempty"`
