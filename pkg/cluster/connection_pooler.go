@@ -194,6 +194,11 @@ func (c *Cluster) getConnectionPoolerEnvVars(mode string, poolSize *int32, disab
 		reservePoolSize = 0 // disabled
 	}
 
+	// MaxDBConn must be higher than reservePoolSize + defaultPoolSize
+	if maxDBConn < reservePoolSize+defaultSize {
+		maxDBConn = reservePoolSize + defaultSize
+	}
+
 	return []v1.EnvVar{
 		{
 			Name:  "CONNECTION_POOLER_PORT",

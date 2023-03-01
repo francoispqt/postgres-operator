@@ -1308,7 +1308,7 @@ func TestGetConnectionPoolerEnvVars(t *testing.T) {
 				{Name: "CONNECTION_POOLER_MIN_SIZE", Value: "25"},
 				{Name: "CONNECTION_POOLER_RESERVE_SIZE", Value: "25"},
 				{Name: "CONNECTION_POOLER_MAX_CLIENT_CONN", Value: fmt.Sprint(constants.ConnectionPoolerMaxClientConnections)},
-				{Name: "CONNECTION_POOLER_MAX_DB_CONN", Value: "50"},
+				{Name: "CONNECTION_POOLER_MAX_DB_CONN", Value: "75"},
 			},
 		},
 		{
