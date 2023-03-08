@@ -1275,6 +1275,7 @@ func TestGetConnectionPoolerEnvVars(t *testing.T) {
 		disableReservePool bool
 		maxDBConn          int32
 		numberOfInstances  int32
+		hba                []string
 		expectedResult     []v1.EnvVar
 	}{
 		{
@@ -1292,6 +1293,8 @@ func TestGetConnectionPoolerEnvVars(t *testing.T) {
 				{Name: "CONNECTION_POOLER_RESERVE_SIZE", Value: "12"},
 				{Name: "CONNECTION_POOLER_MAX_CLIENT_CONN", Value: fmt.Sprint(constants.ConnectionPoolerMaxClientConnections)},
 				{Name: "CONNECTION_POOLER_MAX_DB_CONN", Value: "50"},
+				{Name: "CONNECTION_POOLER_AUTH_TYPE", Value: "md5"},
+				{Name: "CONNECTION_POOLER_HBA", Value: ""},
 			},
 		},
 		{
@@ -1301,6 +1304,7 @@ func TestGetConnectionPoolerEnvVars(t *testing.T) {
 			disableReservePool: false,
 			maxDBConn:          int32(maxDBConn),
 			numberOfInstances:  int32(numberOfInstances),
+			hba:                []string{"host db1 user1 0.0.0.0/0 md5", "host db1 user1 0.0.0.0/0 md5"},
 			expectedResult: []v1.EnvVar{
 				{Name: "CONNECTION_POOLER_PORT", Value: "5432"},
 				{Name: "CONNECTION_POOLER_MODE", Value: poolerMode},
@@ -1309,6 +1313,8 @@ func TestGetConnectionPoolerEnvVars(t *testing.T) {
 				{Name: "CONNECTION_POOLER_RESERVE_SIZE", Value: "25"},
 				{Name: "CONNECTION_POOLER_MAX_CLIENT_CONN", Value: fmt.Sprint(constants.ConnectionPoolerMaxClientConnections)},
 				{Name: "CONNECTION_POOLER_MAX_DB_CONN", Value: "75"},
+				{Name: "CONNECTION_POOLER_AUTH_TYPE", Value: "hba"},
+				{Name: "CONNECTION_POOLER_HBA", Value: "host db1 user1 0.0.0.0/0 md5\nhost db1 user1 0.0.0.0/0 md5"},
 			},
 		},
 		{
@@ -1326,13 +1332,15 @@ func TestGetConnectionPoolerEnvVars(t *testing.T) {
 				{Name: "CONNECTION_POOLER_RESERVE_SIZE", Value: "0"},
 				{Name: "CONNECTION_POOLER_MAX_CLIENT_CONN", Value: fmt.Sprint(constants.ConnectionPoolerMaxClientConnections)},
 				{Name: "CONNECTION_POOLER_MAX_DB_CONN", Value: "50"},
+				{Name: "CONNECTION_POOLER_AUTH_TYPE", Value: "md5"},
+				{Name: "CONNECTION_POOLER_HBA", Value: ""},
 			},
 		},
 	}
 
 	for _, tc := range testCases {
 		cluster := &Cluster{}
-		result := cluster.getConnectionPoolerEnvVars(tc.mode, tc.poolSize, tc.disableReservePool, tc.maxDBConn, tc.numberOfInstances)
+		result := cluster.getConnectionPoolerEnvVars(tc.mode, tc.poolSize, tc.disableReservePool, tc.maxDBConn, tc.numberOfInstances, tc.hba)
 		if !reflect.DeepEqual(result, tc.expectedResult) {
 			t.Errorf("[%s] Expected: %v, but got: %v", tc.testName, tc.expectedResult, result)
 		}

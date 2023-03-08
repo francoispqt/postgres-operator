@@ -177,7 +177,7 @@ func (c *Cluster) createConnectionPooler(LookupFunction InstallFunction) (SyncRe
 //	have to wait for spinning up a new connections.
 //
 // RESERVE_SIZE is how many additional connections to allow for a pooler. Enabled by default.
-func (c *Cluster) getConnectionPoolerEnvVars(mode string, poolSize *int32, disableReservePool bool, maxDBConn int32, numberOfInstances int32) []v1.EnvVar {
+func (c *Cluster) getConnectionPoolerEnvVars(mode string, poolSize *int32, disableReservePool bool, maxDBConn int32, numberOfInstances int32, hba []string) []v1.EnvVar {
 	maxDBConn = maxDBConn / numberOfInstances
 
 	defaultSize := maxDBConn / 2
@@ -197,6 +197,11 @@ func (c *Cluster) getConnectionPoolerEnvVars(mode string, poolSize *int32, disab
 	// MaxDBConn must be higher than reservePoolSize + defaultPoolSize
 	if maxDBConn < reservePoolSize+defaultSize {
 		maxDBConn = reservePoolSize + defaultSize
+	}
+
+	authType := "md5"
+	if len(hba) > 0 {
+		authType = "hba"
 	}
 
 	return []v1.EnvVar{
@@ -227,6 +232,14 @@ func (c *Cluster) getConnectionPoolerEnvVars(mode string, poolSize *int32, disab
 		{
 			Name:  "CONNECTION_POOLER_MAX_DB_CONN",
 			Value: fmt.Sprint(maxDBConn),
+		},
+		{
+			Name:  "CONNECTION_POOLER_AUTH_TYPE",
+			Value: authType,
+		},
+		{
+			Name:  "CONNECTION_POOLER_HBA",
+			Value: strings.Join(hba, "\n"),
 		},
 	}
 }
@@ -281,6 +294,7 @@ func (c *Cluster) generateConnectionPoolerPodTemplate(role PostgresRole, connect
 			connectionPoolerSpec.DisableReservePool,
 			*connectionPoolerSpec.MaxDBConnections,
 			*connectionPoolerSpec.NumberOfInstances,
+			connectionPoolerSpec.HBA,
 		)...)
 
 	poolerContainer := v1.Container{

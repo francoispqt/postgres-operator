@@ -228,6 +228,14 @@ var PostgresCRDResourceValidation = apiextv1.CustomResourceValidation{
 							"disableReservePool": {
 								Type: "boolean",
 							},
+							"hba": {
+								Type: "array",
+								Items: &apiextv1.JSONSchemaPropsOrArray{
+									Schema: &apiextv1.JSONSchemaProps{
+										Type: "string",
+									},
+								},
+							},
 							"mode": {
 								Type: "string",
 								Enum: []apiextv1.JSON{
@@ -532,6 +540,14 @@ var PostgresCRDResourceValidation = apiextv1.CustomResourceValidation{
 									},
 									"disablePostgresPodAnnotations": {
 										Type: "boolean",
+									},
+									"hba": {
+										Type: "array",
+										Items: &apiextv1.JSONSchemaPropsOrArray{
+											Schema: &apiextv1.JSONSchemaProps{
+												Type: "string",
+											},
+										},
 									},
 									"target": {
 										Type: "string",

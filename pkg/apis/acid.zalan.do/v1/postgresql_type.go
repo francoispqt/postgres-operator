@@ -257,6 +257,7 @@ type ConnectionPoolerParameters struct {
 	DisablePostgresPodAnnotations bool              `json:"disablePostgresPodAnnotations,omitempty"`
 	NodeAffinity                  *v1.NodeAffinity  `json:"nodeAffinity,omitempty"`
 	Tolerations                   []v1.Toleration   `json:"tolerations,omitempty"`
+	HBA                           []string          `json:"hba,omitempty"`
 
 	*Resources `json:"resources,omitempty"`
 }

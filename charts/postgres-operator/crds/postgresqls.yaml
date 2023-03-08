@@ -146,6 +146,10 @@ spec:
                     type: integer
                   disableReservePool:
                     type: boolean
+                  hba:
+                    type: array
+                    items:
+                      type: string
                   mode:
                     type: string
                     enum:
@@ -326,6 +330,10 @@ spec:
                       type: integer
                     disableReservePool:
                       type: boolean
+                    hba:
+                      type: array
+                      items:
+                        type: string
                     mode:
                       type: string
                       enum:
