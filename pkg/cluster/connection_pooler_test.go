@@ -1272,6 +1272,7 @@ func TestGetConnectionPoolerEnvVars(t *testing.T) {
 		testName           string
 		mode               string
 		poolSize           *int32
+		disableMinPoolSize bool
 		disableReservePool bool
 		maxDBConn          int32
 		numberOfInstances  int32
@@ -1301,6 +1302,7 @@ func TestGetConnectionPoolerEnvVars(t *testing.T) {
 			testName:           "default-pool-size",
 			mode:               poolerMode,
 			poolSize:           intToPointer(100),
+			disableMinPoolSize: true,
 			disableReservePool: false,
 			maxDBConn:          int32(maxDBConn),
 			numberOfInstances:  int32(numberOfInstances),
@@ -1309,7 +1311,7 @@ func TestGetConnectionPoolerEnvVars(t *testing.T) {
 				{Name: "CONNECTION_POOLER_PORT", Value: "5432"},
 				{Name: "CONNECTION_POOLER_MODE", Value: poolerMode},
 				{Name: "CONNECTION_POOLER_DEFAULT_SIZE", Value: "50"},
-				{Name: "CONNECTION_POOLER_MIN_SIZE", Value: "25"},
+				{Name: "CONNECTION_POOLER_MIN_SIZE", Value: "0"},
 				{Name: "CONNECTION_POOLER_RESERVE_SIZE", Value: "25"},
 				{Name: "CONNECTION_POOLER_MAX_CLIENT_CONN", Value: fmt.Sprint(constants.ConnectionPoolerMaxClientConnections)},
 				{Name: "CONNECTION_POOLER_MAX_DB_CONN", Value: "75"},
@@ -1340,7 +1342,7 @@ func TestGetConnectionPoolerEnvVars(t *testing.T) {
 
 	for _, tc := range testCases {
 		cluster := &Cluster{}
-		result := cluster.getConnectionPoolerEnvVars(tc.mode, tc.poolSize, tc.disableReservePool, tc.maxDBConn, tc.numberOfInstances, tc.hba)
+		result := cluster.getConnectionPoolerEnvVars(tc.mode, tc.poolSize, tc.disableMinPoolSize, tc.disableReservePool, tc.maxDBConn, tc.numberOfInstances, tc.hba)
 		if !reflect.DeepEqual(result, tc.expectedResult) {
 			t.Errorf("[%s] Expected: %v, but got: %v", tc.testName, tc.expectedResult, result)
 		}

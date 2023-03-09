@@ -225,6 +225,9 @@ var PostgresCRDResourceValidation = apiextv1.CustomResourceValidation{
 							"poolSize": {
 								Type: "integer",
 							},
+							"disableMinPoolSize": {
+								Type: "boolean",
+							},
 							"disableReservePool": {
 								Type: "boolean",
 							},
@@ -492,6 +495,9 @@ var PostgresCRDResourceValidation = apiextv1.CustomResourceValidation{
 									},
 									"poolSize": {
 										Type: "integer",
+									},
+									"disableMinPoolSize": {
+										Type: "boolean",
 									},
 									"disableReservePool": {
 										Type: "boolean",

@@ -209,6 +209,11 @@ func (in *ConnectionPoolerParameters) DeepCopyInto(out *ConnectionPoolerParamete
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	if in.HBA != nil {
+		in, out := &in.HBA, &out.HBA
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	if in.Resources != nil {
 		in, out := &in.Resources, &out.Resources
 		*out = new(Resources)

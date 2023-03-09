@@ -144,6 +144,8 @@ spec:
                     type: integer
                   poolSize:
                     type: integer
+                  disableMinPoolSize:
+                    type: boolean
                   disableReservePool:
                     type: boolean
                   hba:
@@ -328,8 +330,10 @@ spec:
                       type: integer
                     poolSize:
                       type: integer
-                    disableReservePool:
+                    disableMinPoolSize:
                       type: boolean
+                    disableReservePool:
+                        type: boolean
                     hba:
                       type: array
                       items:
